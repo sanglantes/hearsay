@@ -19,11 +19,11 @@ import (
 var messagePool []storage.Message
 
 func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.DB) {
-	botNickname := "hearsay" // TODO: Move to configure.go
+	botNick := "hearsay" // TODO: Move to configure.go
 	botUser := "hearsay"
 	botMe := "hearsay"
 
-	cfg := irc.NewConfig(botNickname, botUser, botMe)
+	cfg := irc.NewConfig(botNick, botUser, botMe)
 
 	// https://github.com/fluffle/goirc/blob/v1.3.1/client/connection.go#L144
 	cfg.Version = "Bot"
@@ -39,7 +39,7 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 	c.HandleFunc(irc.CONNECTED,
 		func(c *irc.Conn, l *irc.Line) {
 			c.Join(Channel)
-			c.Mode(botNickname, config.BotMode)
+			c.Mode(botNick, config.BotMode)
 			c.Away(config.CommandPrefix + "help for command list.")
 			log.Printf("Joined %s\n", Channel)
 		})

@@ -18,12 +18,12 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 		return err
 	}
 
-	userInsertionStmt, err := tx.Prepare("INSERT OR IGNORE INTO users(nickname, registered, opt, deletion) VALUES (?, ?, ?, ?)")
+	userInsertionStmt, err := tx.Prepare("INSERT OR IGNORE INTO users(nick, registered, opt, deletion) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
-	messagesStmt, err := tx.Prepare("INSERT INTO messages (nickname, channel, message, time) VALUES (?, ?, ?, ?)")
+	messagesStmt, err := tx.Prepare("INSERT INTO messages (nick, channel, message, time) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}

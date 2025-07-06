@@ -9,15 +9,15 @@ import (
 
 var OptOuts = make(map[string]struct{}) // TODO: Add mutex if this is used in more than one place.
 
-func IfOptedOut(nickname string) bool {
-	if _, exists := OptOuts[nickname]; exists {
+func IfOptedOut(nick string) bool {
+	if _, exists := OptOuts[nick]; exists {
 		return true
 	}
 	return false
 }
 
 func LoadOptOuts(db *sql.DB) error {
-	res, err := db.Query("SELECT nickname FROM users WHERE opt = 0")
+	res, err := db.Query("SELECT nick FROM users WHERE opt = 0")
 	if err != nil {
 		return err
 	}

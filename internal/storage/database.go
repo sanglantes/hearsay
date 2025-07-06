@@ -25,7 +25,7 @@ func InitDatabase() (*sql.DB, error) {
 	db := openDbHelper("data/database.db")
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS messages(
 	id INTEGER PRIMARY KEY,
-	nickname TEXT NOT NULL,
+	nick TEXT NOT NULL,
 	channel TEXT NOT NULL,
 	message TEXT NOT NULL,
 	time DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -35,14 +35,14 @@ func InitDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec("CREATE INDEX IF NOT EXISTS idx_nickname ON messages(nickname)")
+	_, err = db.Exec("CREATE INDEX IF NOT EXISTS idx_nick ON messages(nick)")
 	if err != nil {
-		log.Fatalf("Error indexing nickname: %v\n", err.Error())
+		log.Fatalf("Error indexing nick: %v\n", err.Error())
 		return nil, err
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
-	nickname TEXT PRIMARY KEY,
+	nick TEXT PRIMARY KEY,
 	registered DATETIME DEFAULT CURRENT_TIMESTAMP,
 	opt BOOL DEFAULT TRUE,
 	deletion DATETIME DEFAULT NULL

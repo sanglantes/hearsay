@@ -17,7 +17,7 @@ func optHandler(args []string, author string, db *sql.DB) string {
 		"out": false,
 	}
 
-	res, err := db.Exec("UPDATE users SET opt = ? WHERE nickname = ?", opt[args[0]], author)
+	res, err := db.Exec("UPDATE users SET opt = ? WHERE nick = ?", opt[args[0]], author)
 	if err != nil {
 		log.Fatalf("Failed updating opt preference: %s", err.Error())
 		return author + ": Something went wrong."

@@ -1,6 +1,6 @@
 // +attribute
 // +opt in/out
-// +delete
+// +forget (formerly delete)
 // +mystats
 // +explain
 // +compare
@@ -25,5 +25,10 @@ var Commands = map[string]Command{
 	"+opt": {
 		Handler:     optHandler,
 		Description: optHelp,
+	},
+
+	"+forget": {
+		Handler:     forgetHandler,
+		Description: forgetHelp,
 	},
 }
