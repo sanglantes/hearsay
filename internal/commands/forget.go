@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"database/sql"
 	"hearsay/internal/config"
 	"log"
@@ -66,16 +67,22 @@ func deletionExecuter(db *sql.DB) []string {
 	return deletedNicks
 }
 
-func DeletionWrapper(db *sql.DB, c *irc.Conn) {
+func DeletionWrapper(db *sql.DB, c *irc.Conn, ctx context.Context) {
 	for {
 		now := time.Now()
 		next := now.Truncate(24 * time.Hour).Add(24 * time.Hour)
-		time.Sleep(time.Until(next))
 
-		deletedNicks := deletionExecuter(db)
-		for _, nick := range deletedNicks {
-			// TODO: If the user isn't online, postpone the reminder until they are.
-			c.Privmsg(nick, "Your data has been successfully purged.")
+		select {
+		case <-ctx.Done():
+			log.Println("Shutting down scheduler.")
+			return
+
+		case <-time.After(time.Until(next)):
+			deletedNicks := deletionExecuter(db)
+			for _, nick := range deletedNicks {
+				// TODO: If the user isn't online, postpone the reminder until they are.
+				c.Privmsg(nick, "Your data has been successfully purged.")
+			}
 		}
 	}
 }
