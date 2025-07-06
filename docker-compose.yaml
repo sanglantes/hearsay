@@ -1,0 +1,10 @@
+services:
+  hearsay:
+    build: .
+    image: hearsay-bot
+    volumes:
+      - hearsaydata:/app/data
+    restart: no # change in production to `unless-stopped`
+  
+volumes:
+  hearsaydata:
