@@ -21,7 +21,7 @@ var messagePool []storage.Message
 func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.DB) {
 	botNickname := "hearsay" // TODO: Move to configure.go
 	botUser := "hearsay"
-	botMe := config.CommandPrefix + "help for list of commands."
+	botMe := "hearsay"
 
 	cfg := irc.NewConfig(botNickname, botUser, botMe)
 
@@ -40,6 +40,8 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 		func(c *irc.Conn, l *irc.Line) {
 			c.Join(Channel)
 			c.Mode(botNickname, config.BotMode)
+			c.Away(config.CommandPrefix + "help for command list.")
+			log.Printf("Joined %s\n", Channel)
 		})
 
 	c.HandleFunc(irc.PRIVMSG,
@@ -74,7 +76,7 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 					if err != nil {
 						log.Fatalf("Failed to submit messages: %v\n", err.Error())
 					} else {
-						log.Println("Wrote " + strconv.Itoa(len(messagePool)) + "/" + strconv.Itoa(config.MaxMessagePool) + "messages to database.")
+						log.Println("Wrote " + strconv.Itoa(len(messagePool)) + "/" + strconv.Itoa(config.MaxMessagePool) + " messages to database.")
 						messagePool = nil
 					}
 				}

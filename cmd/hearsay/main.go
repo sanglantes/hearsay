@@ -20,12 +20,24 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	db := storage.InitDatabase()
+	db, err := storage.InitDatabase()
+	if err != nil {
+		log.Fatalln("Failed DB init.")
+	} else {
+		log.Println("Passed DB init.")
+	}
+
 	defer db.Close()
+
+	if err = storage.LoadOptOuts(db); err != nil {
+		log.Fatalf("Failed loading opt-out map: %s\n", err.Error())
+	} else {
+		log.Println("Passed opt-out loading.")
+	}
 
 	serverDisconnect := make(chan struct{}) // We use an empty struct (0 bytes) to emphasize a signal is being closed with close(). Booleans are ambiguous.
 	go func() {
-		core.HearsayConnect("192.168.10.137:6697", "#cat", ctx, db)
+		core.HearsayConnect("192.168.10.137:6697", "#antisocial", ctx, db)
 		close(serverDisconnect)
 	}()
 

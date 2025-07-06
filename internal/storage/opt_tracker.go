@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"log"
 )
 
 // We keep a map of opt-outs. This prevents database lookups.
@@ -20,7 +19,7 @@ func IfOptedOut(nickname string) bool {
 func LoadOptOuts(db *sql.DB) error {
 	res, err := db.Query("SELECT nickname FROM users WHERE opt = 0")
 	if err != nil {
-		log.Fatalf("Failed to load opt-out nicks: %s\n", err.Error())
+		return err
 	}
 	defer res.Close()
 

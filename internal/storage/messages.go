@@ -18,7 +18,7 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 		return err
 	}
 
-	userInsertionStmt, err := tx.Prepare("INSERT OR IGNORE INTO users(nickname, registered, opt, deletion) VALUES (?, ?)")
+	userInsertionStmt, err := tx.Prepare("INSERT OR IGNORE INTO users(nickname, registered, opt, deletion) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 	}
 
 	for _, message := range messages {
-		_, err = userInsertionStmt.Exec(message.Nick, message.Timestamp)
+		_, err = userInsertionStmt.Exec(message.Nick, message.Timestamp, true, nil)
 		if err != nil {
 			tx.Rollback()
 			return err

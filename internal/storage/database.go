@@ -21,7 +21,7 @@ func openDbHelper(path string) *sql.DB {
 	return db
 }
 
-func InitDatabase() *sql.DB {
+func InitDatabase() (*sql.DB, error) {
 	db := openDbHelper("data/database.db")
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS messages(
 	id INTEGER PRIMARY KEY,
@@ -32,11 +32,13 @@ func InitDatabase() *sql.DB {
 	)`)
 	if err != nil {
 		log.Fatalf("Error creating messages table: %v\n", err.Error())
+		return nil, err
 	}
 
 	_, err = db.Exec("CREATE INDEX IF NOT EXISTS idx_nickname ON messages(nickname)")
 	if err != nil {
 		log.Fatalf("Error indexing nickname: %v\n", err.Error())
+		return nil, err
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
@@ -47,7 +49,8 @@ func InitDatabase() *sql.DB {
 	)`)
 	if err != nil {
 		log.Fatalf("Error creating users table: %v\n", err.Error())
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }
