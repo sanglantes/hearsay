@@ -6,6 +6,8 @@ import (
 	"log"
 	"strconv"
 	"time"
+
+	irc "github.com/fluffle/goirc/client"
 )
 
 func forgetHandler(args []string, author string, db *sql.DB) string {
@@ -62,4 +64,18 @@ func deletionExecuter(db *sql.DB) []string {
 	}
 
 	return deletedNicks
+}
+
+func DeletionWrapper(db *sql.DB, c *irc.Conn) {
+	for {
+		now := time.Now()
+		next := now.Truncate(24 * time.Hour).Add(24 * time.Hour)
+		time.Sleep(time.Until(next))
+
+		deletedNicks := deletionExecuter(db)
+		for _, nick := range deletedNicks {
+			// TODO: If the user isn't online, postpone the reminder until they are.
+			c.Privmsg(nick, "Your data has been successfully purged.")
+		}
+	}
 }

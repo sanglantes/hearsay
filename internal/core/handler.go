@@ -42,6 +42,9 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 			c.Mode(botNick, config.BotMode)
 			c.Away(config.CommandPrefix + "help for command list.")
 			log.Printf("Joined %s\n", Channel)
+
+			log.Println("Loading deletion scheduler...")
+			go commands.DeletionWrapper(db, c)
 		})
 
 	c.HandleFunc(irc.PRIVMSG,
