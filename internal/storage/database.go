@@ -28,7 +28,8 @@ func InitDatabase() (*sql.DB, error) {
 	nick TEXT NOT NULL,
 	channel TEXT NOT NULL,
 	message TEXT NOT NULL,
-	time DATETIME DEFAULT CURRENT_TIMESTAMP
+	time DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY(nick) REFERENCES users(nick) ON DELETE CASCADE
 	)`)
 	if err != nil {
 		log.Fatalf("Error creating messages table: %v\n", err.Error())
@@ -45,11 +46,16 @@ func InitDatabase() (*sql.DB, error) {
 	nick TEXT PRIMARY KEY,
 	registered DATETIME DEFAULT CURRENT_TIMESTAMP,
 	opt BOOL DEFAULT TRUE,
-	deletion DATETIME DEFAULT NULL
+	deletion DATETIME
 	)`)
 	if err != nil {
 		log.Fatalf("Error creating users table: %v\n", err.Error())
 		return nil, err
+	}
+
+	_, err = db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		log.Fatalf("Failed to enable foreign keys: %s\n", err.Error())
 	}
 
 	return db, nil
