@@ -6,4 +6,4 @@ const CommandPrefix string = "+"
 
 var BotMode string = "+B"
 
-var DeletionDays int = 7
+var DeletionDays int = 0

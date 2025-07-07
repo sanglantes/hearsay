@@ -29,7 +29,7 @@ func forgetHandler(args []string, author string, db *sql.DB) string {
 	deletionDate := time.Now()
 	deletionDate = deletionDate.AddDate(0, 0, config.DeletionDays)
 	deletionDate = deletionDate.Truncate(24 * time.Hour) // Truncating anything past the day.
-	_, err := db.Exec("UPDATE users SET deletion ? WHERE nick = ?", deletionDate, author)
+	_, err := db.Exec("UPDATE users SET deletion = ? WHERE nick = ?", deletionDate, author)
 	if err != nil {
 		log.Printf("Failed to schedule deletion: %s\n", err.Error())
 		return author + ": The requested action was met with an error."
@@ -71,6 +71,7 @@ func DeletionWrapper(db *sql.DB, c *irc.Conn, ctx context.Context) {
 	for {
 		now := time.Now()
 		next := now.Truncate(24 * time.Hour).Add(24 * time.Hour)
+		log.Printf("Deletion task scheduled for %v\n", next)
 
 		select {
 		case <-ctx.Done():

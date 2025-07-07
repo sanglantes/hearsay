@@ -28,10 +28,6 @@ go.work.sum
 .env
 
 # Editor/IDE
-<<<<<<< HEAD
-# .idea/
-# .vscode/
-=======
 .idea/
 .vscode/
 
@@ -39,4 +35,3 @@ go.work.sum
 *.sqlite
 *.sqlite3
 *.db
->>>>>>> 765e195 (db error handling and c.Away fix)
