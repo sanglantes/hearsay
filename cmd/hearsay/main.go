@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"hearsay/internal/config"
 	"hearsay/internal/core"
 	"hearsay/internal/storage"
 	"log"
@@ -13,6 +14,15 @@ import (
 
 func main() {
 	log.Println("hearsay is starting...")
+
+	configPath := "config.yaml"
+	log.Printf("Reading config from %s.\n", configPath)
+	err := config.ReadConfig(configPath, true)
+	if err != nil {
+		log.Fatalln("Failed to load configuration.")
+	} else {
+		log.Println("Successfully loaded configuration.")
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

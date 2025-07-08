@@ -9,4 +9,5 @@ require (
 	github.com/golang/mock v1.5.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28 // indirect
 	golang.org/x/net v0.18.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

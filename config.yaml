@@ -1,0 +1,9 @@
+bot:
+  prefix: "+"
+  mode: "+B"
+
+storage:
+  message_pool_size: 30
+
+scheduler:
+  deletion_days: 5
