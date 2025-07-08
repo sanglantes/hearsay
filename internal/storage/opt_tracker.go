@@ -9,7 +9,7 @@ import (
 
 var OptOuts = make(map[string]struct{}) // TODO: Add mutex if this is used in more than one place.
 
-func IfOptedOut(nick string) bool {
+func IsOptedOut(nick string) bool {
 	if _, exists := OptOuts[nick]; exists {
 		return true
 	}

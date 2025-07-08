@@ -35,7 +35,7 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 			return err
 		}
 
-		_, err := messagesStmt.Exec(message.Nick, message.Content, message.Channel, message.Timestamp)
+		_, err := messagesStmt.Exec(message.Nick, message.Channel, message.Content, message.Timestamp)
 		if err != nil {
 			tx.Rollback()
 			return err

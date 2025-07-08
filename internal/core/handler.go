@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"hearsay/internal/commands"
@@ -60,28 +59,37 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 			}
 
 			if strings.HasPrefix(incomingMessageContent, config.CommandPrefix) {
+				// Case: The incoming message is preceded by our command prefix.
 				commandAndArgs := strings.Split(incomingMessageContent, " ")
 				receivedCommand := commandAndArgs[0]
 				receivedArgs := commandAndArgs[1:]
 				log.Printf("Received command %s by %s.\n", receivedCommand, incomingMessageAuthor)
 
-				if cmd, ok := commands.Commands[receivedCommand]; ok {
-					c.Privmsg(incomingMessageChannel, cmd.Handler(receivedArgs, incomingMessageAuthor, db))
-				} else {
-					c.Privmsgf(incomingMessageChannel, "No such command: %s", receivedCommand)
-				}
+				go func(rCmd string, rArgs []string, rAuthor string, rChannel string) {
+					if cmd, ok := commands.Commands[rCmd]; ok {
+						c.Privmsg(rChannel, cmd.Handler(rArgs, rAuthor, db))
+					} else {
+						c.Privmsgf(rChannel, "No such command: %s", rCmd)
+					}
+				}(receivedCommand, receivedArgs, incomingMessageAuthor, incomingMessageChannel)
 			}
 
-			if !storage.IfOptedOut(incomingMessageAuthor) {
+			if !storage.IsOptedOut(incomingMessageAuthor) {
+				// Case: The incoming message is not preceded by our command prefix and the nick is not opted out.
 				messagePool = append(messagePool, messageFinal)
-				if len(messagePool) == config.MaxMessagePool {
-					err := storage.SubmitMessages(messagePool, db) // This function is blocking. Having a large pool might cause the bot to miss messages.
-					if err != nil {
-						log.Fatalf("Failed to submit messages: %v\n", err.Error())
-					} else {
-						log.Println("Wrote " + strconv.Itoa(len(messagePool)) + "/" + strconv.Itoa(config.MaxMessagePool) + " messages to database.")
-						messagePool = nil
-					}
+				if len(messagePool) >= config.MaxMessagePool {
+					tempPool := make([]storage.Message, len(messagePool))
+					copy(tempPool, messagePool)
+					messagePool = nil
+
+					go func(pool []storage.Message) {
+						err := storage.SubmitMessages(pool, db)
+						if err != nil {
+							log.Printf("Failed to submit messages: %v\n", err)
+						} else {
+							log.Printf("Wrote %d/%d messages to database.\n", len(pool), config.MaxMessagePool)
+						}
+					}(tempPool)
 				}
 			}
 		})
