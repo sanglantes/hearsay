@@ -31,4 +31,9 @@ var Commands = map[string]Command{
 		Handler:     forgetHandler,
 		Description: forgetHelp,
 	},
+
+	"+unforget": {
+		Handler:     unforgetHandler,
+		Description: unforgetHelp,
+	},
 }
