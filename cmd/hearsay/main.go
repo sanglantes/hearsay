@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"hearsay/internal/config"
 	"hearsay/internal/core"
 	"hearsay/internal/storage"
@@ -14,6 +15,10 @@ import (
 
 func main() {
 	log.Println("hearsay is starting...")
+
+	var serverAddress *string = flag.String("s", "localhost:6697", "server address and port. example: irc.example.net:6697")
+	var channel *string = flag.String("c", "#test", "channel to join. example: #test")
+	flag.Parse()
 
 	configPath := "config.yaml"
 	log.Printf("Reading config from %s.\n", configPath)
@@ -47,7 +52,7 @@ func main() {
 
 	serverDisconnect := make(chan struct{}) // We use an empty struct (0 bytes) to emphasize a signal is being closed with close(). Booleans are ambiguous.
 	go func() {
-		core.HearsayConnect("192.168.10.137:6697", "#antisocial", ctx, db)
+		core.HearsayConnect(*serverAddress, *channel, ctx, db)
 		close(serverDisconnect)
 	}()
 
