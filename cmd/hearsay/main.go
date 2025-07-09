@@ -14,11 +14,11 @@ import (
 )
 
 func main() {
-	log.Println("hearsay is starting...")
-
 	var serverAddress *string = flag.String("s", "localhost:6697", "server address and port. example: irc.example.net:6697")
 	var channel *string = flag.String("c", "#test", "channel to join. example: #test")
 	flag.Parse()
+
+	log.Println("hearsay is starting...")
 
 	configPath := "config.yaml"
 	log.Printf("Reading config from %s.\n", configPath)
