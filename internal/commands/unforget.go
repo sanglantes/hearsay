@@ -2,6 +2,7 @@ package commands
 
 import (
 	"database/sql"
+	"hearsay/internal/config"
 	"log"
 )
 
@@ -19,4 +20,4 @@ func unforgetHandler(args []string, author string, db *sql.DB) string {
 	return author + ": You have successfully cancelled your deletion request."
 }
 
-var unforgetHelp string = "Cancel a scheduled data deletion. Usage: +unforget"
+var unforgetHelp string = `Cancel a scheduled data deletion. Usage: ` + config.CommandPrefix + `unforget`
