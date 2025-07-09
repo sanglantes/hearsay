@@ -38,7 +38,7 @@ func forgetHandler(args []string, author string, db *sql.DB) string {
 	return author + ": Your data is scheduled for deletion and will complete in " + strconv.Itoa(config.DeletionDays) + " days. To cancel this request, type +unforget"
 }
 
-var forgetHelp string = `Permanently purge all your data. Usage: +forget`
+var forgetHelp string = `Permanently purge all your data. Usage: ` + config.CommandPrefix + `forget`
 
 func deletionExecuter(db *sql.DB) []string {
 	deletedNicks := []string{}
@@ -71,7 +71,7 @@ func DeletionWrapper(db *sql.DB, c *irc.Conn, ctx context.Context) {
 	for {
 		now := time.Now()
 		next := now.Truncate(24 * time.Hour).Add(24 * time.Hour)
-		log.Printf("Deletion task scheduled for %v\n", next)
+		log.Printf("Next deletion cycle scheduled for %v\n", next)
 
 		select {
 		case <-ctx.Done():

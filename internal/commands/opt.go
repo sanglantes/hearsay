@@ -37,4 +37,4 @@ func optHandler(args []string, author string, db *sql.DB) string {
 	return author + ": You have successfully opted " + args[0] + "."
 }
 
-var optHelp string = `Opt in or out from data collection. Usage: +opt <in|out>`
+var optHelp string = `Opt in or out from data collection. Usage: ` + config.CommandPrefix + `opt <(in|out)>`

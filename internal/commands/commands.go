@@ -19,9 +19,9 @@ type Command struct {
 var Commands = make(map[string]Command)
 
 func init() {
-	Commands["+attribute"] = Command{attributeHandler, attributeHelp}
-	Commands["+opt"] = Command{optHandler, optHelp}
-	Commands["+forget"] = Command{forgetHandler, forgetHelp}
-	Commands["+unforget"] = Command{unforgetHandler, unforgetHelp}
-	Commands["+help"] = Command{helpHandler, helpHelp}
+	Commands["attribute"] = Command{attributeHandler, attributeHelp}
+	Commands["opt"] = Command{optHandler, optHelp}
+	Commands["forget"] = Command{forgetHandler, forgetHelp}
+	Commands["unforget"] = Command{unforgetHandler, unforgetHelp}
+	Commands["help"] = Command{helpHandler, helpHelp}
 }

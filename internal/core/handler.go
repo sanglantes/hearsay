@@ -61,7 +61,7 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 			if strings.HasPrefix(incomingMessageContent, config.CommandPrefix) {
 				// Case: The incoming message is preceded by our command prefix.
 				commandAndArgs := strings.Split(incomingMessageContent, " ")
-				receivedCommand := commandAndArgs[0]
+				receivedCommand := strings.Split(commandAndArgs[0], config.CommandPrefix)[1]
 				receivedArgs := commandAndArgs[1:]
 				log.Printf("Received command %s by %s.\n", receivedCommand, incomingMessageAuthor)
 
