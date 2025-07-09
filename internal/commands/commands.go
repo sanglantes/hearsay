@@ -16,24 +16,12 @@ type Command struct {
 	Description string
 }
 
-var Commands = map[string]Command{
-	"+attribute": {
-		Handler:     attributeHandler,
-		Description: attributeHelp,
-	},
+var Commands = make(map[string]Command)
 
-	"+opt": {
-		Handler:     optHandler,
-		Description: optHelp,
-	},
-
-	"+forget": {
-		Handler:     forgetHandler,
-		Description: forgetHelp,
-	},
-
-	"+unforget": {
-		Handler:     unforgetHandler,
-		Description: unforgetHelp,
-	},
+func init() {
+	Commands["+attribute"] = Command{attributeHandler, attributeHelp}
+	Commands["+opt"] = Command{optHandler, optHelp}
+	Commands["+forget"] = Command{forgetHandler, forgetHelp}
+	Commands["+unforget"] = Command{unforgetHandler, unforgetHelp}
+	Commands["+help"] = Command{helpHandler, helpHelp}
 }
