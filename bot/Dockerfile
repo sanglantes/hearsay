@@ -15,5 +15,4 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev gcc && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/hearsay .
-
-CMD ["./hearsay"]
+COPY config.yaml .

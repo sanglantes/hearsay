@@ -4,6 +4,7 @@ services:
     image: hearsay-bot
     volumes:
       - hearsay-data:/app/data
+    command: ./hearsay -s 192.168.10.137:6697 -c \#test
     restart: no # change in production to `unless-stopped`
     networks:
       - hearsay-net
@@ -11,6 +12,7 @@ services:
   api:
     build: ./api
     image: hearsay-api
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
     ports:
       - "8080:8080"
     volumes:
@@ -23,4 +25,4 @@ volumes:
   hearsay-data:
 
 networks:
-  - hearsay-net
+  hearsay-net:
