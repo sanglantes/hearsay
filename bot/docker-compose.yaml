@@ -13,6 +13,8 @@ services:
     image: hearsay-api
     ports:
       - "8080:8080"
+    volumes:
+      - hearsay-data:/app/data
     restart: no
     networks:
       - hearsay-net

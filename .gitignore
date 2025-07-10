@@ -35,3 +35,5 @@ go.work.sum
 *.sqlite
 *.sqlite3
 *.db
+
+venv/
