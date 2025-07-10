@@ -1,0 +1,24 @@
+services:
+  hearsay:
+    build: ./bot
+    image: hearsay-bot
+    volumes:
+      - hearsay-data:/app/data
+    restart: no # change in production to `unless-stopped`
+    networks:
+      - hearsay-net
+
+  api:
+    build: ./api
+    image: hearsay-api
+    ports:
+      - "8080:8080"
+    restart: no
+    networks:
+      - hearsay-net
+  
+volumes:
+  hearsay-data:
+
+networks:
+  - hearsay-net
