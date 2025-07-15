@@ -37,6 +37,7 @@ go.work.sum
 *.db
 
 # Python stuff
-venv/
+.venv/
 __pycache__/
 *.pyc
+*.joblib

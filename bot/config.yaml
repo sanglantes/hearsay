@@ -3,7 +3,7 @@ bot:
   mode: "+B"
 
 storage:
-  message_pool_size: 30
+  message_pool_size: 20
 
 scheduler:
   deletion_days: 5
