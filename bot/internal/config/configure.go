@@ -11,6 +11,7 @@ var CommandPrefix = "+"
 var BotMode = "+B"
 var MaxMessagePool = 30
 var DeletionDays = 5
+var MessageQuota = 100
 
 type BotStruct struct {
 	Prefix string `yaml:"prefix"`
@@ -19,6 +20,7 @@ type BotStruct struct {
 
 type StorageStruct struct {
 	MessagePoolSize int `yaml:"message_pool_size"`
+	MessageQuota    int `yaml:"message_quota"`
 }
 
 type SchedulerStruct struct {
@@ -54,6 +56,10 @@ func ReadConfig(path string, verbose bool) error {
 
 	if cfg.Storage.MessagePoolSize > 0 {
 		MaxMessagePool = cfg.Storage.MessagePoolSize
+	}
+
+	if cfg.Storage.MessageQuota > 0 {
+		MessageQuota = cfg.Storage.MessageQuota
 	}
 
 	if cfg.Scheduler.DeletionDays > 0 {

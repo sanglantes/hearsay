@@ -45,7 +45,7 @@ func InitDatabase() (*sql.DB, error) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
 	nick TEXT PRIMARY KEY,
 	registered DATETIME DEFAULT CURRENT_TIMESTAMP,
-	opt BOOL DEFAULT TRUE,
+	opt BOOL DEFAULT FALSE,
 	deletion DATETIME
 	)`)
 	if err != nil {

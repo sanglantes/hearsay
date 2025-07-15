@@ -4,6 +4,7 @@ bot:
 
 storage:
   message_pool_size: 20
+  message_quota: 100
 
 scheduler:
   deletion_days: 5

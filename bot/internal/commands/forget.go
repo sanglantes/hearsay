@@ -62,10 +62,6 @@ func deletionExecuter(db *sql.DB) []string {
 			log.Printf("Failed to delete nick from users table: %s\n", err.Error())
 		} else {
 			deletedNicks = append(deletedNicks, nick)
-			_, err = db.Exec("INSERT INTO users(nick, opt) VALUES (?, ?)", nick, false)
-			if err != nil {
-				log.Printf("Failed to recreate deleted user %s: %s\n", nick, err.Error())
-			}
 		}
 	}
 
@@ -87,7 +83,7 @@ func DeletionWrapper(db *sql.DB, c *irc.Conn, ctx context.Context) {
 			deletedNicks := deletionExecuter(db)
 			for _, nick := range deletedNicks {
 				// TODO: If the user isn't online, postpone the reminder until they are.
-				c.Privmsg(nick, "Your data has been successfully purged. Additionally, you have been opted out for future data collection.")
+				c.Privmsg(nick, "Your data has been successfully purged.")
 			}
 		}
 	}

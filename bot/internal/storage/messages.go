@@ -2,6 +2,8 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"time"
 )
 
@@ -43,4 +45,17 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 	}
 
 	return tx.Commit()
+}
+
+func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
+	var count int
+
+	err := db.QueryRow("SELECT COUNT(nick) FROM messages WHERE nick = ? AND time >= datetime('now', '-30 days')", nick).Scan(&count)
+	fmt.Printf("%d\n", count)
+	if err != nil {
+		log.Printf("Failed to count messages in HasLessMessagesThan for nick %s: %s\n", nick, err.Error())
+		return false
+	}
+
+	return (count > quota)
 }
