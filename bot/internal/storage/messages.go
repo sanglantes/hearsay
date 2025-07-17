@@ -50,12 +50,12 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
 	var count int
 
-	err := db.QueryRow("SELECT COUNT(nick) FROM messages WHERE nick = ? AND time >= datetime('now', '-30 days')", nick).Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM messages WHERE nick = ?", nick).Scan(&count)
 	fmt.Printf("%d\n", count)
 	if err != nil {
 		log.Printf("Failed to count messages in FulfilsMessagesCount for nick %s: %s\n", nick, err.Error())
 		return false
 	}
 
-	return (count > quota)
+	return (count >= quota)
 }

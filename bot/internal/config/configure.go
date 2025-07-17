@@ -36,14 +36,14 @@ type ConfigStruct struct {
 func ReadConfig(path string, verbose bool) error {
 	yamlFile, err := os.ReadFile(path)
 	if err != nil {
-		log.Printf("Failed to open config file: %s — using defaults.\n", err)
+		log.Printf("Failed to open config file: %s\n", err)
 		return err
 	}
 
 	var cfg ConfigStruct
 	err = yaml.Unmarshal(yamlFile, &cfg)
 	if err != nil {
-		log.Printf("Failed to unmarshal YAML: %s — using defaults.\n", err)
+		log.Printf("Failed to unmarshal YAML: %s\n", err)
 		return err
 	}
 
@@ -67,7 +67,7 @@ func ReadConfig(path string, verbose bool) error {
 	}
 
 	if verbose {
-		log.Printf("Configuration:\nPrefix: %s\nMode: %s\nPool size: %d\nDeletion: %d", CommandPrefix, BotMode, MaxMessagePool, DeletionDays)
+		log.Printf("Configuration:\nPrefix: %s\nMode: %s\nPool size: %d\nQuota: %d\nDeletion: %d\n", CommandPrefix, BotMode, MaxMessagePool, MessageQuota, DeletionDays)
 	}
 
 	return nil
