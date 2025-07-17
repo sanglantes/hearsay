@@ -72,9 +72,7 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 						c.Privmsgf(rChannel, "No such command: %s", rCmd)
 					}
 				}(receivedCommand, receivedArgs, incomingMessageAuthor, incomingMessageChannel)
-			}
-
-			else if !storage.IsOptedOut(incomingMessageAuthor) {
+			} else if !storage.IsOptedOut(incomingMessageAuthor) {
 				// Case: The incoming message is not preceded by our command prefix and the nick is not opted out.
 				messagePool = append(messagePool, messageFinal)
 				if len(messagePool) >= config.MaxMessagePool {
