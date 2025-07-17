@@ -41,3 +41,5 @@ go.work.sum
 __pycache__/
 *.pyc
 *.joblib
+cache/
+.cache/

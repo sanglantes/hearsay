@@ -53,7 +53,7 @@ func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
 	err := db.QueryRow("SELECT COUNT(nick) FROM messages WHERE nick = ? AND time >= datetime('now', '-30 days')", nick).Scan(&count)
 	fmt.Printf("%d\n", count)
 	if err != nil {
-		log.Printf("Failed to count messages in HasLessMessagesThan for nick %s: %s\n", nick, err.Error())
+		log.Printf("Failed to count messages in FulfilsMessagesCount for nick %s: %s\n", nick, err.Error())
 		return false
 	}
 
