@@ -13,7 +13,7 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 	}
 
 	if !storage.FulfilsMessagesCount(author, config.MessageQuota, db) {
-		return fmt.Sprintf("%s: You have too few messages stored to use this command. hearsay requires %d messages within the last 30 days.", author, config.MessageQuota)
+		return fmt.Sprintf("%s: You have too few messages stored to use this command. hearsay requires %d messages.", author, config.MessageQuota)
 	}
 	return author + " is a nerd."
 }

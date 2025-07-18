@@ -30,7 +30,7 @@ def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = "/app
         res = conn.execute("""SELECT m.nick, m.message 
                            FROM messages m
                            JOIN users u ON m.nick = u.nick
-                           WHERE opt = 1
+                           
                            AND m.nick
                             IN (SELECT nick 
                             FROM messages
@@ -45,7 +45,7 @@ def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = "/app
 @memory.cache
 def get_messages_from_nick(nick: str, db_time: int, db_path: str = "/app/data/database.db") -> list[str]:
     with sqlite3.connect(db_path) as conn:
-        res = conn.execute("SELECT message FROM messages WHERE nick = ?", (nick,))
+        res = conn.execute("SELECT message FROM messages WHERE nick = ? ORDER BY id DESC LIMIT 10000", (nick,))
         return [msg[0] for msg in res]
 
 def is_nick_eligible(count: int, nick: str, db_path: str = "/app/data/database.db") -> bool:
