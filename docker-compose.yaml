@@ -4,7 +4,7 @@ services:
     image: hearsay-bot
     volumes:
       - ./bot/data:/app/data
-    command: ./hearsay -s 192.168.10.137:6697 -c \#test
+    command: ./hearsay -s irc.zoite.net:6697 -c \#antisocial
     init: true
     restart: unless-stopped # change in production to `unless-stopped`
     depends_on:

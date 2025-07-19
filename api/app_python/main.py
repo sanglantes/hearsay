@@ -2,6 +2,9 @@ from urllib import request
 from fastapi import FastAPI
 import requests
 
+from typing import Optional
+from pydantic import BaseModel
+
 app = FastAPI()
 
 @app.get("/ping")
@@ -13,35 +16,39 @@ def readability(nick: str) -> dict[str, float]:
     import s_readability as s_readability
     return {"score": s_readability.flesch_score(nick)}
 
-@app.get("/retrain")
-def retrain(varg: str) -> dict[str, str] | None:
-    import s_retrain
-    import joblib
-    import time
+class RetrainResponse(BaseModel):
+    time: float
+    url: Optional[str]      # empty string or None if no CM
+    accuracy: float
 
-    url = ''
-    acc = 0
-    cm = False
-    if varg == "--cm":
-        cm = True
+@app.get(
+    "/retrain",
+    response_model=RetrainResponse,
+    summary="Retrain the model, optionally return a confusion‐matrix link"
+)
+def retrain(varg: Optional[str] = None) -> RetrainResponse:
+    import s_retrain, joblib, time, requests
 
+    cm_requested = (varg == "--cm")
     pipeline = s_retrain.create_pipeline()
-    joblib.dump(pipeline, "pipeline.joblib")
-    
+
     X, y = s_retrain.get_X_y()
-    t1 = time.time()
+    start = time.time()
     pipeline.fit(X, y)
-    t_delta = time.time() - t1
+    elapsed = time.time() - start
+    joblib.dump(pipeline, "pipeline.joblib")
 
-
-    if cm:
-        cm_table, labels, acc = s_retrain.evaluate_pipeline(pipeline, X, y)
+    url: Optional[str] = None
+    accuracy = 0.0
+    if cm_requested:
+        cm_table, labels, accuracy = s_retrain.evaluate_pipeline(pipeline, X, y)
         s_retrain.plot_and_save_confusion_matrix(cm_table, labels)
+        with open("cm.png", "rb") as f:
+            resp = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f})
+            print(resp.json())
+            if resp.json()["status"] == "success":
+                url = resp.json()["data"]["url"]
+            else:
+                url = "failed"
 
-        with open("confusion_matrix.png", "rb") as f:
-            files = {"file": f}
-            response = requests.post("https://api.put.re/upload", files=files)
-            if response.json()["status"] == "success":
-                url = response.json()["data"]["link"]
-    
-    return {"time": t_delta, "url": url, "accuracy": acc}
+    return RetrainResponse(time=elapsed, url=url, accuracy=accuracy)

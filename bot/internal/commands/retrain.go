@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 type retrainResponse struct {
@@ -17,13 +18,20 @@ type retrainResponse struct {
 	Accuracy float64 `json:"accuracy"`
 }
 
+var lastRetrain = time.Now().Add(-12 * time.Hour)
+
 func retrainHandler(args []string, author string, db *sql.DB) string {
+	if time.Since(lastRetrain) < 12*time.Hour {
+		return author + ": The model has already been retrained within the last 12 hours."
+	}
+	lastRetrain = time.Now()
+
 	if storage.IsOptedOut(author) {
 		return author + ": You must be opted in to use this command. +help opt"
 	}
 
-	if !storage.EnoughFulfilsMessagesCount(5, config.MessageQuota, db) { // TODO: (URGENT) Add in config.yaml
-		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires X people with >=%d messages.", author, config.MessageQuota)
+	if !storage.EnoughFulfilsMessagesCount(config.PeopleQuota, config.MessageQuota, db) { // TODO: (URGENT) Add in config.yaml
+		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires %d people with >= %d messages.", author, config.PeopleQuota, config.MessageQuota)
 	}
 
 	url := "http://api:8111/retrain"

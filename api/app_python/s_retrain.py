@@ -143,7 +143,7 @@ def evaluate_pipeline(pipeline: Pipeline, X: list[str], y: list[str], cv: int = 
     return cm, pipeline.classes_, acc
 
 
-def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: str = "confusion_matrix.png"):
+def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: str = "cm.png"):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
     disp.plot(cmap="Blues", xticks_rotation=45)
     plt.title("Confusion Matrix")
