@@ -30,7 +30,6 @@ def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = "/app
         res = conn.execute("""SELECT m.nick, m.message 
                            FROM messages m
                            JOIN users u ON m.nick = u.nick
-                           
                            AND m.nick
                             IN (SELECT nick 
                             FROM messages

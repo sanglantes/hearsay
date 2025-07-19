@@ -4,8 +4,8 @@ bot:
 
 storage:
   message_pool_size: 20
-  message_quota: 300
+  message_quota: 400
   people_quota: 5
 
 scheduler:
-  deletion_days: 5
+  deletion_days: 1

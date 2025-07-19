@@ -1,5 +1,6 @@
-from urllib import request
+from asyncio import streams
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import requests
 
 from typing import Optional
@@ -18,21 +19,20 @@ def readability(nick: str) -> dict[str, float]:
 
 class RetrainResponse(BaseModel):
     time: float
-    url: Optional[str]      # empty string or None if no CM
+    url: Optional[str]
     accuracy: float
 
 @app.get(
     "/retrain",
     response_model=RetrainResponse,
-    summary="Retrain the model, optionally return a confusion‐matrix link"
+    summary="Retrain the model, optionally return a confusion-matrix link."
 )
-def retrain(varg: Optional[str] = None) -> RetrainResponse:
+def retrain(min_messages: int, varg: Optional[str] = None) -> RetrainResponse:
     import s_retrain, joblib, time, requests
-
     cm_requested = (varg == "--cm")
     pipeline = s_retrain.create_pipeline()
 
-    X, y = s_retrain.get_X_y()
+    X, y = s_retrain.get_X_y(min_messages)
     start = time.time()
     pipeline.fit(X, y)
     elapsed = time.time() - start
@@ -52,3 +52,29 @@ def retrain(varg: Optional[str] = None) -> RetrainResponse:
                 url = "failed"
 
     return RetrainResponse(time=elapsed, url=url, accuracy=accuracy)
+
+class AttributeRequest(BaseModel):
+    msg: str
+    min_messages: int
+
+@app.post(
+    "/attribute",
+    summary="Attribute a message to a chatter."
+)
+def attribute(req: AttributeRequest) -> str:
+    import joblib, os
+    import s_retrain
+
+    print(req.msg)
+
+    if not os.path.exists("pipeline.joblib"):
+        pipeline = s_retrain.create_pipeline()
+        X, y = s_retrain.get_X_y(req.min_messages)
+        pipeline.fit(X, y)
+
+        joblib.dump(pipeline, "pipeline.joblib")
+    else:
+        pipeline = joblib.load("pipeline.joblib")
+    
+    author = pipeline.predict([req.msg])[0]
+    return JSONResponse(content={"author": author})

@@ -102,7 +102,6 @@ def create_pipeline() -> Pipeline:
             ("fw_freq_dist", CountVectorizer(analyzer="word",
                                              vocabulary=function_word_list,
                                              lowercase=True)),
-
             ("punct_freq_dist", CountVectorizer(tokenizer=punctuation_tokenizer,
                                                 vocabulary=['.', '...', '?', '??', '???', '!', ';', ':', '\''],
                                                 token_pattern=None)),
@@ -123,7 +122,7 @@ def create_pipeline() -> Pipeline:
     return pipeline
 
 
-def get_X_y(min_messages: int = 150) -> tuple[list[str], list[str]]:
+def get_X_y(min_messages: int) -> tuple[list[str], list[str]]:
     author_messages = preprocess_remove_garbage(
         database.get_messages_with_x_plus_messages(min_messages, database.get_db_timestamp())
     )
