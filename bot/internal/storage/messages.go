@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 )
@@ -51,7 +50,6 @@ func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
 	var count int
 
 	err := db.QueryRow("SELECT COUNT(*) FROM messages WHERE nick = ?", nick).Scan(&count)
-	fmt.Printf("%d\n", count)
 	if err != nil {
 		log.Printf("Failed to count messages in FulfilsMessagesCount for nick %s: %s\n", nick, err.Error())
 		return false
