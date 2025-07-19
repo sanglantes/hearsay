@@ -25,4 +25,5 @@ func init() {
 	Commands["unforget"] = Command{unforgetHandler, unforgetHelp}
 	Commands["help"] = Command{helpHandler, helpHelp}
 	Commands["readability"] = Command{readabilityHandler, readabilityHelp}
+	Commands["retrain"] = Command{retrainHandler, retrainHelp}
 }

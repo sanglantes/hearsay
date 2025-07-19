@@ -57,3 +57,14 @@ func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
 
 	return (count >= quota)
 }
+
+func EnoughFulfilsMessagesCount(peopleQuota int, messageQuota int, db *sql.DB) bool {
+	var count int
+
+	err := db.QueryRow("SELECT COUNT(*) FROM (SELECT nick FROM messages GROUP BY nick HAVING COUNT(*) >= ?)", messageQuota).Scan(&count)
+	if err != nil {
+		log.Printf("Failed to count messages in EnoughFulfilsMessagesCount: %s\n", err.Error())
+	}
+
+	return (count >= peopleQuota)
+}
