@@ -67,7 +67,7 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 		return author + ": Failed to fetch results."
 	}
 
-	return fmt.Sprintf("%s: Predicted author: %s", author, result.Author)
+	return fmt.Sprintf("%s: Predicted author: %s_", author, result.Author)
 }
 
 var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: ` + config.CommandPrefix + `attribute <message>`

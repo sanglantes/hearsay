@@ -1,11 +1,3 @@
-// +attribute
-// +opt in/out
-// +forget (formerly delete)
-// +mystats
-// +explain
-// +compare
-// +topwords
-
 package commands
 
 import "database/sql"

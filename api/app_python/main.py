@@ -65,8 +65,6 @@ def attribute(req: AttributeRequest) -> str:
     import joblib, os
     import s_retrain
 
-    print(req.msg)
-
     if not os.path.exists("pipeline.joblib"):
         pipeline = s_retrain.create_pipeline()
         X, y = s_retrain.get_X_y(req.min_messages)
