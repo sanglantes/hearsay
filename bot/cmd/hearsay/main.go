@@ -50,7 +50,7 @@ func main() {
 		log.Println("Passed opt-out loading.")
 	}
 
-	serverDisconnect := make(chan struct{}) // We use an empty struct (0 bytes) to emphasize a signal is being closed with close(). Booleans are ambiguous.
+	serverDisconnect := make(chan struct{})
 	go func() {
 		core.HearsayConnect(*serverAddress, *channel, ctx, db)
 		close(serverDisconnect)
@@ -63,7 +63,7 @@ func main() {
 		time.Sleep(2 * time.Second)
 
 	case <-serverDisconnect:
-		return
+		os.Exit(1)
 	}
 
 }

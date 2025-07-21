@@ -18,6 +18,11 @@ func openDbHelper(path string) *sql.DB {
 		log.Fatalf("Error connecting to %s: %v\n", path, err)
 	}
 
+	_, err = db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		log.Fatalf("Failed to enable foreign keys: %s\n", err.Error())
+	}
+
 	return db
 }
 
@@ -51,11 +56,6 @@ func InitDatabase() (*sql.DB, error) {
 	if err != nil {
 		log.Fatalf("Error creating users table: %v\n", err.Error())
 		return nil, err
-	}
-
-	_, err = db.Exec("PRAGMA foreign_keys = ON")
-	if err != nil {
-		log.Fatalf("Failed to enable foreign keys: %s\n", err.Error())
 	}
 
 	return db, nil

@@ -6,7 +6,7 @@ services:
       - ./bot/data:/app/data
     command: ./hearsay -s irc.zoite.net:6697 -c \#antisocial
     init: true
-    restart: unless-stopped # change in production to `unless-stopped`
+    restart: on-failure:2
     environment:
       - TZ=Europe/Stockholm
     depends_on:
