@@ -1,4 +1,5 @@
 from asyncio import streams
+from cmudict import defaultdict
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import requests
@@ -21,6 +22,7 @@ class RetrainResponse(BaseModel):
     time: float
     url: Optional[str]
     accuracy: float
+    f1: float
 
 @app.get(
     "/retrain",
@@ -41,7 +43,7 @@ def retrain(min_messages: int, varg: Optional[str] = None) -> RetrainResponse:
     url: Optional[str] = None
     accuracy = 0.0
     if cm_requested:
-        cm_table, labels, accuracy = s_retrain.evaluate_pipeline(pipeline, X, y)
+        cm_table, labels, accuracy, f1 = s_retrain.evaluate_pipeline(pipeline, X, y)
         s_retrain.plot_and_save_confusion_matrix(cm_table, labels)
         with open("cm.png", "rb") as f:
             resp = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f})
@@ -51,17 +53,18 @@ def retrain(min_messages: int, varg: Optional[str] = None) -> RetrainResponse:
             else:
                 url = "failed"
 
-    return RetrainResponse(time=elapsed, url=url, accuracy=accuracy)
+    return RetrainResponse(time=elapsed, url=url, accuracy=accuracy, f1=f1)
 
 class AttributeRequest(BaseModel):
     msg: str
     min_messages: int
+    confidence: bool = False
 
 @app.post(
     "/attribute",
     summary="Attribute a message to a chatter."
 )
-def attribute(req: AttributeRequest) -> str:
+def attribute(req: AttributeRequest) -> JSONResponse:
     import joblib, os
     import s_retrain
 
@@ -75,4 +78,14 @@ def attribute(req: AttributeRequest) -> str:
         pipeline = joblib.load("pipeline.joblib")
     
     author = pipeline.predict([req.msg])[0]
-    return JSONResponse(content={"author": author})
+
+    if req.confidence:
+        confidence = pipeline.decision_function([req.msg]).tolist()[0]
+
+        labels = map(str, pipeline.named_steps["clf"].classes_)
+
+        conf_map = dict(zip(labels, confidence))
+        conf_map = dict(sorted(conf_map.items(), key=lambda x: x[1], reverse=True)[:3])
+        conf_str = ', '.join(f"{l}_ ({c:.2f})" for l, c in conf_map.items())
+
+    return JSONResponse(content={"author": author, "confidence": conf_str})

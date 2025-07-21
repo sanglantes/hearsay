@@ -18,21 +18,21 @@ type scoreResponse struct {
 func scoreClass(score float64) string {
 	switch {
 	case 90.0 <= score:
-		return "5th grade | Very easy to read."
+		return "5th grade level. Very easy to read."
 	case 80.0 <= score:
-		return "6th grade | Easy to read. Conversational English for consumers."
+		return "6th grade level. Easy to read. Conversational English for consumers."
 	case 70.0 <= score:
-		return "7th grade | Fairly easy to read."
+		return "7th grade level. Fairly easy to read."
 	case 60.0 <= score:
-		return "8th & 9th grade | Plain English."
+		return "8th & 9th grade. Plain English."
 	case 50.0 <= score:
-		return "10th to 12th grade | Fairly difficult to read."
+		return "10th to 12th grade. Fairly difficult to read."
 	case 30.0 <= score:
-		return "College | Difficult to read."
+		return "College level. Difficult to read."
 	case 10.0 <= score:
-		return "College graduate | Very difficult to read."
+		return "College graduate level. Very difficult to read."
 	case 0.0 <= score:
-		return "Professional | Extremely difficult to read."
+		return "Professional level. Extremely difficult to read."
 	}
 
 	return "Unknown."
@@ -72,7 +72,7 @@ func readabilityHandler(args []string, author string, db *sql.DB) string {
 		return author + ": Failed to fetch results."
 	}
 
-	return fmt.Sprintf("%s: \x02FLESCH-KINCAID:\x02  %.2f => %s", author, result.Score, scoreClass(result.Score))
+	return fmt.Sprintf("%s: You have a Flesch-Kincaid score of %.2f (%s)", author, result.Score, scoreClass(result.Score))
 }
 
 var readabilityHelp string = `Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: ` + config.CommandPrefix + `readability`

@@ -1,11 +1,12 @@
 from collections import defaultdict
+from venv import create
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.feature_selection import f_classif, SelectKBest
-from sklearn.model_selection import cross_val_score, cross_val_predict
+from sklearn.model_selection import cross_val_score, cross_val_predict, cross_validate
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.dummy import DummyClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, Normalizer
 from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import TruncatedSVD
@@ -13,13 +14,15 @@ import database
 import numpy as np
 import re
 import matplotlib.pyplot as plt
+from random import shuffle, seed
 
+seed(32)
 
 def preprocess_remove_garbage(author_message: dict[str, list[str]]) -> defaultdict[str, list[str]]:
     cleaned = defaultdict(list)
 
     url_pattern = re.compile(r"https?://\S+|www\.\S+")
-    quote_pattern = re.compile(r'^[><."]')
+    quote_pattern = re.compile(r'^[><."“!:*]')
 
     for author, messages in author_message.items():
         for message in messages:
@@ -32,17 +35,21 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]]) -> defaultdi
     return cleaned
 
 
-class AverageWordLength(BaseEstimator, TransformerMixin):
+class WordLengthDistribution(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
     
     def transform(self, X):
-        avg_lengths = []
+        result = []
         for msg in X:
+            dist = [0] * 30
             words = re.findall(r'\b\w+\b', msg)
-            avg = np.mean([len(w) for w in words]) if words else 0
-            avg_lengths.append([avg])
-        return np.array(avg_lengths)
+            for word in words:
+                length = min(len(word), 29)
+                dist[length] += 1
+            result.append(dist)
+
+        return np.array(result)
 
 
 class SentenceLength(BaseEstimator, TransformerMixin):
@@ -84,40 +91,38 @@ function_word_list = [
     'however', 'thus', 'all', 'may', 'everyone', 'she', 'yet', 'whether', 'his', 
     'everything', 'do', 'yourself', 'can', 'if', 'whose', 'such', 'anyone', 
     'my', 'per', 'her', 'either'
-]
-
+] # PREVIEW TESTS HAVE SHOWN INEFFECTIVE. EXPAND OR REMOVE
 
 def punctuation_tokenizer(text: str) -> list[str]:
     return re.findall(r'\.\.\.|[\?\!]{2,}|[.,;:!?\'"-]', text)
-
 
 def create_pipeline() -> Pipeline:
     pipeline = Pipeline([
         ("features", FeatureUnion([
             ("reduced_tfidf", Pipeline([
-                ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4), lowercase=False)),
-                #("sb", SelectKBest(score_func=f_classif, k=500)) # Faster but reduces performance
+                ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,3), lowercase=True)),
+                #("sb", SelectKBest(score_func=f_classif, k=100)) # Faster but reduces performance
                 #("svd", TruncatedSVD(n_components=3000)) TOO SLOW
             ])),
             ("fw_freq_dist", CountVectorizer(analyzer="word",
                                              vocabulary=function_word_list,
                                              lowercase=True)),
             ("punct_freq_dist", CountVectorizer(tokenizer=punctuation_tokenizer,
-                                                vocabulary=['.', '...', '?', '??', '???', '!', ';', ':', '\''],
+                                                vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
                                                 token_pattern=None)),
             #("sentence_length", SentenceLength()),
-            #("avg_wl", AverageWordLength())
+            ("wl_dist", WordLengthDistribution()),
             ("caps", Capitalization())
         ],
         transformer_weights={
-            "punct_freq_dist": 5.0,
+            #"punct_freq_dist": 1,
             #"sentence_length": 5.0,
             #"avg_wl": 5.0
-            "caps": 5.0
+            #"caps": 1
         }
         )),
-        #("scaler", StandardScaler(with_mean=False)),
-        ("clf", LinearSVC(class_weight="balanced"))
+        #("scaler", Normalizer()),
+        ("clf", LinearSVC(class_weight="balanced", max_iter=5000))
     ])
     return pipeline
 
@@ -127,19 +132,25 @@ def get_X_y(min_messages: int) -> tuple[list[str], list[str]]:
         database.get_messages_with_x_plus_messages(min_messages, database.get_db_timestamp())
     )
     X, y = [], []
+    cap = min(len(v) for v in author_messages.values()) + 290
     for nick, msgs in author_messages.items():
-        for msg in msgs:
+        shuffle(msgs)
+        for msg in msgs[:cap]:
             X.append(msg)
             y.append(nick)
     return X, y
 
 
-def evaluate_pipeline(pipeline: Pipeline, X: list[str], y: list[str], cv: int = 5) -> tuple[np.ndarray, list[str], float]:
-    y_pred_test = cross_val_predict(pipeline, X, y, cv=cv)
-    cm = confusion_matrix(y, y_pred_test)
-    acc = accuracy_score(y, y_pred_test)
+def evaluate_pipeline(pipeline: Pipeline, X: list[str], y: list[str], cv: int = 5) -> tuple[np.ndarray, list[str], float, float]:
+    y_test = cross_validate(pipeline, X, y, cv=cv, scoring=["accuracy", "f1_macro"])
+    y_pred_test = cross_val_predict(pipeline, X, y, cv=cv) # really annoying to have to run CV twice
 
-    return cm, pipeline.classes_, acc
+    cm = confusion_matrix(y, y_pred_test)
+
+    acc = y_test["test_accuracy"].mean()
+    f1 = y_test["test_f1_macro"].mean()
+
+    return cm, pipeline.classes_, acc, f1
 
 
 def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: str = "cm.png"):
@@ -148,3 +159,12 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
     plt.title("Confusion Matrix")
     plt.tight_layout()
     plt.savefig(filename, dpi=300)
+
+if __name__ == "__main__":
+    pipeline = create_pipeline()
+    X, y = get_X_y(250)
+    pipeline.fit(X, y)
+    print(pipeline.named_steps["clf"].classes_)
+
+    c = cross_validate(pipeline, X, y, cv=10, scoring=["accuracy", "f1_macro"])
+    print(f"accuracy:\t{c['test_accuracy'].mean()}\nf1:\t{c['test_f1_macro'].mean()}")

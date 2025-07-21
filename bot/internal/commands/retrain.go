@@ -16,6 +16,7 @@ type retrainResponse struct {
 	TimeD    float64 `json:"time"`
 	Url      string  `json:"url"`
 	Accuracy float64 `json:"accuracy"`
+	F1       float64 `json:"f1"`
 }
 
 var lastRetrain = time.Now().Add(-2 * time.Hour)
@@ -63,9 +64,9 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 		return author + ": Failed to fetch results."
 	}
 
-	responseOne := fmt.Sprintf("%s: The SVM model has been retrained. It took %.2f seconds to fit.", author, result.TimeD)
+	responseOne := fmt.Sprintf("%s: The SVM model has been retrained. It took \x02%.2f\x02 seconds to fit.", author, result.TimeD)
 	if result.Url != "" {
-		responseOne += fmt.Sprintf(" Confusion matrix: %s | Five-fold cross-validation accuracy: %.1f%%", result.Url, result.Accuracy*100)
+		responseOne += fmt.Sprintf(" \x02Confusion matrix\x02: %s | \x025-fold CV\x02: Accuracy %.4f, F1 score %.4f", result.Url, result.Accuracy, result.F1)
 	}
 
 	return responseOne

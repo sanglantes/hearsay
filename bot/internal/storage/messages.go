@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -36,7 +37,7 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 			return err
 		}
 
-		_, err := messagesStmt.Exec(message.Nick, message.Channel, message.Content, message.Timestamp)
+		_, err := messagesStmt.Exec(message.Nick, message.Channel, strings.TrimSpace(message.Content), message.Timestamp)
 		if err != nil {
 			tx.Rollback()
 			return err

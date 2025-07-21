@@ -14,7 +14,8 @@ import (
 )
 
 type attributeResponse struct {
-	Author string `json:"author"`
+	Author          string `json:"author"`
+	ConfidenceScore string `json:"confidence"`
 }
 
 func attributeHandler(args []string, author string, db *sql.DB) string {
@@ -34,6 +35,7 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 	body := map[string]interface{}{
 		"msg":          msg,
 		"min_messages": config.MessageQuota,
+		"confidence":   true,
 	}
 	postJson, err := json.Marshal(body)
 	if err != nil {
@@ -67,7 +69,7 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 		return author + ": Failed to fetch results."
 	}
 
-	return fmt.Sprintf("%s: Predicted author: %s_", author, result.Author)
+	return fmt.Sprintf("%s: Predicted author: %s_. Confidence scores: %s", author, result.Author, result.ConfidenceScore)
 }
 
 var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: ` + config.CommandPrefix + `attribute <message>`
