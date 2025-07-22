@@ -22,11 +22,6 @@ type retrainResponse struct {
 var lastRetrain = time.Now().Add(-2 * time.Hour)
 
 func retrainHandler(args []string, author string, db *sql.DB) string {
-	if time.Since(lastRetrain) < 2*time.Hour {
-		return author + ": The model has already been retrained within the last 2 hours."
-	}
-	lastRetrain = time.Now()
-
 	if storage.IsOptedOut(author) {
 		return author + ": You must be opted in to use this command. +help opt"
 	}
@@ -34,6 +29,12 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 	if !storage.EnoughFulfilsMessagesCount(config.PeopleQuota, config.MessageQuota, db) {
 		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires %d people with >= %d messages.", author, config.PeopleQuota, config.MessageQuota)
 	}
+
+	if time.Since(lastRetrain) < 2*time.Hour {
+		log.Printf("%v\n", lastRetrain)
+		return author + ": The model has already been retrained within the last 2 hours."
+	}
+	lastRetrain = time.Now()
 
 	url := fmt.Sprintf("http://api:8111/retrain?min_messages=%d", config.MessageQuota)
 	if len(args) != 0 {

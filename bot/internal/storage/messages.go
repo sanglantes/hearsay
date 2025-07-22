@@ -31,7 +31,7 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 	}
 
 	for _, message := range messages {
-		_, err = userInsertionStmt.Exec(message.Nick, message.Timestamp, true, nil)
+		_, err = userInsertionStmt.Exec(message.Nick, message.Timestamp, false, nil)
 		if err != nil {
 			tx.Rollback()
 			return err

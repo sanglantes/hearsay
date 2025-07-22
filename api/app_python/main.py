@@ -1,5 +1,3 @@
-from asyncio import streams
-from cmudict import defaultdict
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import requests
@@ -18,18 +16,11 @@ def readability(nick: str) -> dict[str, float]:
     import s_readability as s_readability
     return {"score": s_readability.flesch_score(nick)}
 
-class RetrainResponse(BaseModel):
-    time: float
-    url: Optional[str]
-    accuracy: float
-    f1: float
-
 @app.get(
     "/retrain",
-    response_model=RetrainResponse,
-    summary="Retrain the model, optionally return a confusion-matrix link."
+    summary="Retrain the model. Optionally return a confusion-matrix link."
 )
-def retrain(min_messages: int, varg: Optional[str] = None) -> RetrainResponse:
+def retrain(min_messages: int, varg: Optional[str] = None) -> JSONResponse:
     import s_retrain, joblib, time, requests
     cm_requested = (varg == "--cm")
     pipeline = s_retrain.create_pipeline()
@@ -40,20 +31,22 @@ def retrain(min_messages: int, varg: Optional[str] = None) -> RetrainResponse:
     elapsed = time.time() - start
     joblib.dump(pipeline, "pipeline.joblib")
 
-    url: Optional[str] = None
+    url = ""
     accuracy = 0.0
+    f1 = 0.0
     if cm_requested:
         cm_table, labels, accuracy, f1 = s_retrain.evaluate_pipeline(pipeline, X, y)
         s_retrain.plot_and_save_confusion_matrix(cm_table, labels)
         with open("cm.png", "rb") as f:
             resp = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f})
-            print(resp.json())
-            if resp.json()["status"] == "success":
-                url = resp.json()["data"]["url"]
+            respj = resp.json()
+            
+            if respj["status"] == "success":
+                url = respj["data"]["url"]
             else:
                 url = "failed"
 
-    return RetrainResponse(time=elapsed, url=url, accuracy=accuracy, f1=f1)
+    return JSONResponse(content={"time": elapsed, "url": url, "accuracy": accuracy, "f1": f1})
 
 class AttributeRequest(BaseModel):
     msg: str

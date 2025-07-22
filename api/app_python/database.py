@@ -5,10 +5,12 @@ from collections import defaultdict
 
 memory = Memory("./cache")
 
-def get_connection(db_path: str = "/app/data/database.db") -> sqlite3.Connection:
+dp = "/app/data/database.db"
+
+def get_connection(db_path: str = dp) -> sqlite3.Connection:
     return sqlite3.connect(db_path)
 
-def get_db_timestamp(db_path: str = "/app/data/database.db") -> int:
+def get_db_timestamp(db_path: str = dp) -> int:
     """
     The purpose of this function is to invalidate cache by checking database updates.
     If the message pool limit is low, this function is generally needless.
@@ -18,13 +20,13 @@ def get_db_timestamp(db_path: str = "/app/data/database.db") -> int:
 
     return int(os.path.getmtime(db_path)) // 1000 # We add a 1000 second leniency
 
-def get_nicks_with_x_plus_messages(x: int, db_path: str = "/app/data/database.db") -> list[str]:
+def get_nicks_with_x_plus_messages(x: int, db_path: str = dp) -> list[str]:
     with sqlite3.connect(db_path) as conn:
         res = conn.execute("SELECT nick FROM messages GROUP BY nick HAVING COUNT(*) > ?", (x,))
         return [u[0] for u in res]
     
 @memory.cache
-def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = "/app/data/database.db") -> dict[str, list[str]]:
+def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = dp) -> dict[str, list[str]]:
     author_message = defaultdict(list)
     with sqlite3.connect(db_path) as conn:
         res = conn.execute("""SELECT m.nick, m.message 
@@ -43,12 +45,12 @@ def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = "/app
     return author_message
 
 @memory.cache
-def get_messages_from_nick(nick: str, db_time: int, db_path: str = "/app/data/database.db") -> list[str]:
+def get_messages_from_nick(nick: str, db_time: int, db_path: str = dp) -> list[str]:
     with sqlite3.connect(db_path) as conn:
         res = conn.execute("SELECT message FROM messages WHERE nick = ? ORDER BY id DESC LIMIT 10000", (nick,))
         return [msg[0] for msg in res]
 
-def is_nick_eligible(count: int, nick: str, db_path: str = "/app/data/database.db") -> bool:
+def is_nick_eligible(count: int, nick: str, db_path: str = dp) -> bool:
     with sqlite3.connect(db_path) as conn:
         res = conn.execute("""SELECT
                            COUNT(*)
