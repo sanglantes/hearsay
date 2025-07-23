@@ -20,15 +20,12 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]]) -> defaultdi
     cleaned = defaultdict(list)
 
     url_pattern = re.compile(r"https?://\S+|www\.\S+")
-    quote_pattern = re.compile(r'^[><."“!:*]')
-    date_quote = re.compile(r'^(?:\[\d{2}:\d{2}:\d{2}\]|\d{2}:\d{2}:\d{2})')
-
+    quote_pattern = re.compile(r'^[><."“!:*\[]')
     for author, messages in author_message.items():
         for message in messages:
             if (
                 url_pattern.search(message) or
-                quote_pattern.match(message) or
-                date_quote.match(message)
+                quote_pattern.match(message)
             ): continue
             cleaned[author].append(message)
 

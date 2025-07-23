@@ -43,8 +43,9 @@ func readabilityHandler(args []string, author string, db *sql.DB) string {
 		return author + ": You must be opted in to use this command. +help opt"
 	}
 
-	if !storage.FulfilsMessagesCount(author, config.MessageQuota, db) {
-		return fmt.Sprintf("%s: You have too few messages stored to use this command. hearsay requires %d messages.", author, config.MessageQuota)
+	fulfil, count := storage.FulfilsMessagesCount(author, config.MessageQuota, db)
+	if !fulfil {
+		return fmt.Sprintf("%s: You have too few messages stored to use this command. You have %d/%d messages.", author, count, config.MessageQuota)
 	}
 
 	url := fmt.Sprintf("http://api:8111/readability?nick=%s", author)

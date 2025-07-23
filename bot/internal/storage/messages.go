@@ -47,16 +47,23 @@ func SubmitMessages(messages []Message, db *sql.DB) error {
 	return tx.Commit()
 }
 
-func FulfilsMessagesCount(nick string, quota int, db *sql.DB) bool {
+func FulfilsMessagesCount(nick string, quota int, db *sql.DB) (bool, int) {
 	var count int
+	var currentCount int
 
 	err := db.QueryRow("SELECT COUNT(*) FROM messages WHERE nick = ?", nick).Scan(&count)
 	if err != nil {
 		log.Printf("Failed to count messages in FulfilsMessagesCount for nick %s: %s\n", nick, err.Error())
-		return false
+		return false, 0
 	}
 
-	return (count >= quota)
+	err = db.QueryRow("SELECT COUNT(*) FROM messages WHERE nick = ?", nick).Scan(&currentCount)
+	if err != nil {
+		log.Printf("Failed to count individual messages in FulfilsMessagesCount: %s\n", err.Error())
+		return false, 0
+	}
+
+	return (count >= quota), currentCount
 }
 
 func EnoughFulfilsMessagesCount(peopleQuota int, messageQuota int, db *sql.DB) bool {

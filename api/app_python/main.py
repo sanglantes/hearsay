@@ -29,7 +29,7 @@ def retrain(min_messages: int, varg: Optional[str] = None) -> JSONResponse:
     start = time.time()
     pipeline.fit(X, y)
     elapsed = time.time() - start
-    joblib.dump(pipeline, "pipeline.joblib")
+    joblib.dump(pipeline, "/app/data/pipeline.joblib")
 
     url = ""
     accuracy = 0.0
@@ -61,14 +61,14 @@ def attribute(req: AttributeRequest) -> JSONResponse:
     import joblib, os
     import s_retrain
 
-    if not os.path.exists("pipeline.joblib"):
+    if not os.path.exists("/app/data/pipeline.joblib"):
         pipeline = s_retrain.create_pipeline()
         X, y = s_retrain.get_X_y(req.min_messages)
         pipeline.fit(X, y)
 
-        joblib.dump(pipeline, "pipeline.joblib")
+        joblib.dump(pipeline, "/app/data/pipeline.joblib")
     else:
-        pipeline = joblib.load("pipeline.joblib")
+        pipeline = joblib.load("/app/data/pipeline.joblib")
     
     author = pipeline.predict([req.msg])[0]
 
@@ -78,7 +78,7 @@ def attribute(req: AttributeRequest) -> JSONResponse:
         labels = map(str, pipeline.named_steps["clf"].classes_)
 
         conf_map = dict(zip(labels, confidence))
-        conf_map = dict(sorted(conf_map.items(), key=lambda x: x[1], reverse=True)[:3])
-        conf_str = ', '.join(f"{l}_ ({c:.2f})" for l, c in conf_map.items())
+        conf_map = sorted(conf_map.items(), key=lambda x: x[1], reverse=True)[:3]
+        conf_str = ', '.join(f"{lc[0]}_ ({lc[1]:.2f})" for lc in conf_map)
 
     return JSONResponse(content={"author": author, "confidence": conf_str})
