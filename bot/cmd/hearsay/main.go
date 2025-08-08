@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"hearsay/internal/config"
 	"hearsay/internal/core"
 	"hearsay/internal/storage"
@@ -14,10 +13,6 @@ import (
 )
 
 func main() {
-	var serverAddress *string = flag.String("s", "localhost:6697", "server address and port. example: irc.example.net:6697")
-	var channel *string = flag.String("c", "#test", "channel to join. example: #test")
-	flag.Parse()
-
 	log.Println("hearsay is starting...")
 
 	configPath := "config.yaml"
@@ -52,7 +47,7 @@ func main() {
 
 	serverDisconnect := make(chan struct{})
 	go func() {
-		core.HearsayConnect(*serverAddress, *channel, ctx, db)
+		core.HearsayConnect(config.Server, config.Channel, ctx, db)
 		close(serverDisconnect)
 	}()
 

@@ -1,6 +1,8 @@
 bot:
   prefix: "+"
   mode: "+B"
+  server: "irc.zoite.net:6697"
+  channel: "#antisocial"
 
 storage:
   message_pool_size: 20

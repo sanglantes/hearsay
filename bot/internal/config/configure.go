@@ -12,14 +12,18 @@ import (
 
 var CommandPrefix = "+"
 var BotMode = "+B"
+var Server = "irc.zoite.net:6697"
+var Channel = "#antisocial"
 var MaxMessagePool = 30
 var DeletionDays = 1
 var MessageQuota = 100
 var PeopleQuota = 5
 
 type BotStruct struct {
-	Prefix string `yaml:"prefix"`
-	Mode   string `yaml:"mode"`
+	Prefix  string `yaml:"prefix"`
+	Mode    string `yaml:"mode"`
+	Server  string `yaml:"server"`
+	Channel string `yaml:"channel"`
 }
 
 type StorageStruct struct {
@@ -78,6 +82,12 @@ func ReadConfig(path string, verbose bool) error {
 	}
 	if cfg.Bot.Mode != "" {
 		BotMode = cfg.Bot.Mode
+	}
+	if cfg.Bot.Server != "" {
+		Server = cfg.Bot.Server
+	}
+	if cfg.Bot.Channel != "" {
+		Channel = cfg.Bot.Channel
 	}
 
 	if cfg.Storage.MessagePoolSize > 0 {

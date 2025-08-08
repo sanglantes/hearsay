@@ -26,4 +26,4 @@ func helpHandler(args []string, author string, db *sql.DB) string {
 	return author + ": No such command " + args[0] + "."
 }
 
-var helpHelp string = `Get information on a command. Usage: ` + config.CommandPrefix + `help <command>`
+var helpHelp string = `Get information on a command. Usage: ` + config.CommandPrefix + `help [command]`
