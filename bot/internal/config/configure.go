@@ -1,8 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
+
+	"reflect"
 
 	"gopkg.in/yaml.v3"
 )
@@ -33,6 +36,27 @@ type ConfigStruct struct {
 	Bot       BotStruct       `yaml:"bot"`
 	Storage   StorageStruct   `yaml:"storage"`
 	Scheduler SchedulerStruct `yaml:"scheduler"`
+}
+
+func List(v interface{}) {
+	value := reflect.ValueOf(v)
+	typeR := reflect.TypeOf(v)
+
+	if value.Kind() == reflect.Pointer {
+		value = value.Elem()
+		typeR = typeR.Elem()
+	}
+
+	for i := 0; i < value.NumField(); i++ {
+		field := typeR.Field(i)
+		val := value.Field(i)
+
+		if val.Kind() == reflect.Struct {
+			List(val.Interface())
+		} else {
+			fmt.Printf("%s: %v\n", field.Name, val.Interface())
+		}
+	}
 }
 
 func ReadConfig(path string, verbose bool) error {
@@ -73,7 +97,7 @@ func ReadConfig(path string, verbose bool) error {
 	}
 
 	if verbose {
-		log.Printf("Configuration:\nPrefix: %s\nMode: %s\nPool size: %d\nQuota: %d\nDeletion: %d\n", CommandPrefix, BotMode, MaxMessagePool, MessageQuota, DeletionDays)
+		List(cfg)
 	}
 
 	return nil
