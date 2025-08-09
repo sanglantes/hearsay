@@ -75,6 +75,12 @@ To get help on a command, use the `help` command. This will display. Available c
 ```
 ![Confusion matrix](/misc/cm.png)
 
+### Attribution
+```
+<Menchers> +attribute \o
+<hearsay> Menchers: Predicted author: morph_. Confidence scores: morph_ (-0.12), Menchers_ (-0.66), tonitrus_ (-0.79)
+```
+
 ### Readability
 ```
 <katt> +readability
