@@ -157,7 +157,7 @@ def get_X_y(min_messages: int) -> tuple[list[str], list[str]]:
         database.get_messages_with_x_plus_messages(min_messages, database.get_db_timestamp())
     )
     X, y = [], []
-    cap = min(len(v) for v in author_messages.values()) + 250
+    cap = min(len(v) for v in author_messages.values()) + 300
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
