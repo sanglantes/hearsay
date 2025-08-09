@@ -46,7 +46,7 @@ scheduler:
 ```
 
 - `prefix`: The bot prefix. If a message starts with this symbol or string, it will be activated. In case of prefix conflict with existing bots, change this.
-- `mode`: This are the positive (exclusive) or negative modes to be set on the bot. `+B` is a common mode for server bots.
+- `mode`: This are the positive or (exclusive) negative modes to be set on the bot. `+B` is a common mode for server bots.
 - `server`: Server and port to connect to on start-up.
 - `channel`: Channel to connect to on start-up.
 - `message_pool_size`: By default, hearsay does not submit an incoming message to the database when received. Instead, it waits for a message pool to fill up before creating a transaction where all (in this case 20) messages are submitted. This prevents frequent I/O. Depending on server size, you might want to adjust this value, but 20 is a good middle ground.
@@ -61,11 +61,11 @@ To get help on a command, use the `help` command. This will display. Available c
 - `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: `+attribute <message>`
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
 - `forget`: Permanently purge all your data. Usage: `+forget`
-- `unforget`: ancel a scheduled data deletion. Usage: `+unforget`
+- `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
 - `help`: Get information on a command. Usage: `help [command]`
 - `readability`: Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: `+readability`
 - `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). Usage: `+retrain [--cm]`
-`about`: Information about hearsay. Usage: `+about`
+- `about`: Information about hearsay. Usage: `+about`
 
 ## Examples
 Coming soon.

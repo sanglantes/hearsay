@@ -4,7 +4,7 @@ services:
     image: hearsay-bot
     volumes:
       - ./bot/data:/app/data
-    command: ./hearsay -s irc.zoite.net:6697 -c \#antisocial
+    command: ./hearsay
     init: true
     restart: on-failure:2
     environment:
