@@ -22,7 +22,7 @@ hearsay uses the [GoIRC](https://github.com/fluffle/goirc) client for IRC connec
 It is highly recommended to use the provided Docker configuration to run hearsay. To build and run the bot, run `sudo docker compose up --build --detach` in the base directory.
 
 > [!IMPORTANT]
-> The bot is automatically configured to connect to `irc.zoite.net`. Change this before running the bot. See [Configuration](#configuration) for more.
+> The bot is automatically configured to connect to `irc.zoite.net`. Change this before running the Docker container. See [Configuration](#configuration) for more.
 
 This might take a while.
 
@@ -52,11 +52,10 @@ scheduler:
 - `message_pool_size`: By default, hearsay does not submit an incoming message to the database when received. Instead, it waits for a message pool to fill up before creating a transaction where all (in this case 20) messages are submitted. This prevents frequent I/O. Depending on server size, you might want to adjust this value, but 20 is a good middle ground.
 - `message_quota`: This is an important setting. Before users can access NLP commands, they must fulfil a message quota. If the message quota is too low, the bot will make inaccurate assessments. Four-hundred is on the lower side.
 - `people_quota`: Before authorship attribution commands can be used, five people must fulfil the `message_quota`. With a lower `people_quota`, the author population becomes less diverse. Five is a good start for small to medium big servers.
-- `deletion_days`: When a user issues the `forget` command, all their data will be purged. To prevent accidental deletions, their request is put on a schedule. After one day, their data will be deleted. Note that `deletion_days` cannot be lower than one.
+- `deletion_days`: When a user issues the `forget` command, all their data will be purged. To prevent accidental deletions, their request is put on a schedule. After the set amount of days, their data will be purged. Note that `deletion_days` cannot be lower than one.
 
 ## Usage
-
-To get help on a command, use the `help` command. This will display. Available commands are attribute, opt, forget, unforget, help, readability, retrain, and about.
+To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, and about.
 
 - `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: `+attribute <message>`
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
