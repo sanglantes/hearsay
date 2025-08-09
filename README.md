@@ -73,7 +73,7 @@ To get help on a command, use the `help` command. This will display. Available c
 <katt> +retrain --cm
 <hearsay> katt: The SVM model has been retrained. It took 4.83 seconds to fit. Confusion matrix: http://tmpfiles.org/9753032/cm.png | 5-fold CV: Accuracy 0.5552, F1 score 0.5590
 ```
-[[/misc/cm.png|Confusion matrix]]
+![Confusion matrix](/misc/cm.png)
 
 ### Readability
 ```
