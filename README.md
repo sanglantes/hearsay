@@ -61,7 +61,7 @@ To get help on a command, use the `help` command. Available commands are attribu
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
 - `forget`: Permanently purge all your data. Usage: `+forget`
 - `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
-- `help`: Get information on a command. Usage: `help [command]`
+- `help`: Get information on a command. Usage: `+help [command]`
 - `readability`: Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: `+readability`
 - `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). Usage: `+retrain [--cm]`
 - `about`: Information about hearsay. Usage: `+about`
