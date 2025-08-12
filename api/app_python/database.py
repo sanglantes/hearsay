@@ -26,19 +26,37 @@ def get_nicks_with_x_plus_messages(x: int, db_path: str = dp) -> list[str]:
         return [u[0] for u in res]
     
 @memory.cache
-def get_messages_with_x_plus_messages(x: int, db_time: int, db_path: str = dp) -> dict[str, list[str]]:
+def get_messages_with_x_plus_messages(x: int, cf: int, db_path: str = dp) -> dict[str, list[str]]:
     author_message = defaultdict(list)
+    
+    base_query = """
+        SELECT m.nick, m.message 
+        FROM messages m
+        JOIN users u ON m.nick = u.nick
+        WHERE u.opt = 1
+          AND m.nick IN (
+            SELECT nick
+            FROM messages
+            GROUP BY nick
+            HAVING COUNT(*) > ?
+          )
+    """
+    
+    params = [x]
+    
+    if cf > 0:
+        base_query += """
+          AND m.nick IN (
+            SELECT nick
+            FROM messages
+            GROUP BY nick
+            HAVING MAX(time) > datetime('now', '-' || ? || ' days')
+          )
+        """
+        params.append(cf)
+    
     with sqlite3.connect(db_path) as conn:
-        res = conn.execute("""SELECT m.nick, m.message 
-                           FROM messages m
-                           JOIN users u ON m.nick = u.nick
-                           WHERE u.opt = 1
-                           AND m.nick
-                            IN (SELECT nick 
-                            FROM messages
-                            GROUP BY nick
-                            HAVING COUNT(*) > ?)
-                           """, (x,))
+        res = conn.execute(base_query, params)
         for nick, message in res:
             author_message[nick].append(message)
     

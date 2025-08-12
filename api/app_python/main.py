@@ -20,12 +20,18 @@ def readability(nick: str) -> dict[str, float]:
     "/retrain",
     summary="Retrain the model. Optionally return a confusion-matrix link."
 )
-def retrain(min_messages: int, varg: Optional[str] = None) -> JSONResponse:
+def retrain(
+    min_messages: int,
+    cm: Optional[int] = 0,
+    cf: Optional[int] = 0
+) -> JSONResponse:
     import s_retrain, joblib, time, requests
-    cm_requested = (varg == "--cm")
+
+    cm = bool(cm)
+
     pipeline = s_retrain.create_pipeline()
 
-    X, y = s_retrain.get_X_y(min_messages)
+    X, y = s_retrain.get_X_y(min_messages, cf)
     start = time.time()
     pipeline.fit(X, y)
     elapsed = time.time() - start
@@ -34,19 +40,23 @@ def retrain(min_messages: int, varg: Optional[str] = None) -> JSONResponse:
     url = ""
     accuracy = 0.0
     f1 = 0.0
-    if cm_requested:
+    if cm:
         cm_table, labels, accuracy, f1 = s_retrain.evaluate_pipeline(pipeline, X, y)
         s_retrain.plot_and_save_confusion_matrix(cm_table, labels)
         with open("cm.png", "rb") as f:
             resp = requests.post("https://tmpfiles.org/api/v1/upload", files={"file": f})
             respj = resp.json()
-            
             if respj["status"] == "success":
                 url = respj["data"]["url"]
             else:
                 url = "failed"
 
-    return JSONResponse(content={"time": elapsed, "url": url, "accuracy": accuracy, "f1": f1})
+    return JSONResponse(content={
+        "time": elapsed,
+        "url": url,
+        "accuracy": accuracy,
+        "f1": f1
+    })
 
 class AttributeRequest(BaseModel):
     msg: str

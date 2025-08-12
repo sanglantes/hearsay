@@ -142,17 +142,17 @@ def create_pipeline() -> Pipeline:
             "reduced_tfidf": 0.7,
         }
         )),
-        ("clf", LinearSVC())
+        ("clf", LinearSVC(class_weight="balanced"))
     ])
 
     return pipeline
 
-def get_X_y(min_messages: int) -> tuple[list[str], list[str]]:
+def get_X_y(min_messages: int, cf: int) -> tuple[list[str], list[str]]:
     author_messages = preprocess_remove_garbage(
-        database.get_messages_with_x_plus_messages(min_messages, database.get_db_timestamp())
+        database.get_messages_with_x_plus_messages(min_messages, cf)
     , min_messages)
     X, y = [], []
-    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.2)
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.25)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
