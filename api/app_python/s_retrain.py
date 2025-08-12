@@ -11,7 +11,8 @@ import re
 import matplotlib.pyplot as plt
 from random import shuffle
 
-def preprocess_remove_garbage(author_message: dict[str, list[str]]) -> defaultdict[str, list[str]]:
+
+def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int = 400) -> defaultdict[str, list[str]]:
     cleaned = defaultdict(list)
 
     url_pattern = re.compile(r"https?://\S+|www\.\S+")
@@ -24,9 +25,16 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]]) -> defaultdi
             ): continue
             cleaned[author].append(message)
 
-    return cleaned
+    cleaned_final = defaultdict(list)
+    for author, messages in cleaned.items():
+        if len(messages) < quota:
+            continue
+        cleaned_final[author] = messages
 
 
+    return cleaned_final
+
+"""
 class WordLengthDistribution(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
@@ -42,7 +50,7 @@ class WordLengthDistribution(BaseEstimator, TransformerMixin):
             result.append(dist)
 
         return np.array(result)
-  
+"""
 
 class Capitalization(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -60,7 +68,57 @@ class Capitalization(BaseEstimator, TransformerMixin):
             caps.append([cntr])
         
         return np.array(caps)
-    
+
+
+class POSTagging(BaseEstimator, TransformerMixin):
+    def __init__(self, model="en_core_web_sm"):
+        self.model = model
+        self.nlp = None
+
+        self._posmap = [
+            "",
+            "ADJ",
+            "ADP",
+            "ADV",
+            "AUX",
+            "CONJ",
+            "CCONJ",
+            "DET",
+            "INTJ",
+            "NOUN",
+            "NUM",
+            "PART",
+            "PRON",
+            "PROPN",
+            "PUNCT",
+            "SCONJ",
+            "SYM",
+            "VERB",
+            "X",
+            "EOL",
+            "SPACE"
+        ]
+        self.posmap = {i:e for e, i in enumerate(self._posmap)}
+
+    def fit(self, X, y=None):
+        import spacy
+
+        # Strange pickle behaviour that prevents this to occur in __init__.
+        self.nlp = spacy.load(self.model, disable=["ner", "parser", "lemmatizer"])
+
+        return self
+
+    def transform(self, X):
+        author_pos = []
+
+        for doc in self.nlp.pipe(X, batch_size=1000):
+            posses = [0] * 21
+            for token in doc:
+                posses[self.posmap[token.pos_]] += 1
+            author_pos.append(posses)
+
+        return np.array(author_pos)
+
 
 def punctuation_tokenizer(text: str) -> list[str]:
     return re.findall(r'\.\.\.|[\?\!]{2,}|[.,;:!?\'"-]', text)
@@ -75,12 +133,13 @@ def create_pipeline() -> Pipeline:
             ("punct_freq_dist", CountVectorizer(tokenizer=punctuation_tokenizer,
                                                 vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
                                                 token_pattern=None)),
-            ("wl_dist", WordLengthDistribution()),
             ("caps", Capitalization()),
+            ("pos", POSTagging())
         ],
         transformer_weights={
-            "caps": 1.5,
-            "punct_freq_dist": 1.1
+            "caps": 1.5, 
+            "punct_freq_dist": 1.3, 
+            "reduced_tfidf": 0.7,
         }
         )),
         ("clf", LinearSVC())
@@ -91,9 +150,9 @@ def create_pipeline() -> Pipeline:
 def get_X_y(min_messages: int) -> tuple[list[str], list[str]]:
     author_messages = preprocess_remove_garbage(
         database.get_messages_with_x_plus_messages(min_messages, database.get_db_timestamp())
-    )
+    , min_messages)
     X, y = [], []
-    cap = min(len(v) for v in author_messages.values()) + 400
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.2)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
