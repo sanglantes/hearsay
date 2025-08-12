@@ -26,7 +26,7 @@ func ImportLogs(db *sql.DB, path string) error {
 	if err != nil {
 		return err
 	}
-	userStmt, err := tx.Prepare("SELECT 1 FROM users WHERE nick = ? LIMIT 1")
+	userStmt, err := tx.Prepare("SELECT 1 FROM users WHERE nick = ? AND opt = 1 LIMIT 1")
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func ImportLogs(db *sql.DB, path string) error {
 			continue
 		}
 
-		t, err := time.Parse("2006Jan 2 15:04:05", fmt.Sprintf("%s %s %s", line[0], line[1], line[2]))
+		t, err := time.Parse("Jan 2 15:04:05 2006", fmt.Sprintf("%s %s %s %s", line[0], line[1], line[2], "2025"))
 		if err != nil {
 			return err
 		}
