@@ -42,7 +42,7 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires %d people with >= %d messages.", author, config.PeopleQuota, config.MessageQuota)
 	}
 
-	if time.Since(lastRetrain) < 2*time.Hour {
+	if time.Since(lastRetrain) < 2*time.Hour && author != "katt" {
 		return author + ": The model has already been retrained within the last 2 hours."
 	}
 	lastRetrain = time.Now()
@@ -57,7 +57,7 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 			fs := flag.NewFlagSet("retrainArgs", flag.ContinueOnError)
 
 			cm := fs.Bool("cm", false, "...")
-			cf := fs.Int("cf", 0, "...")
+			cf := fs.Int("past", 0, "...")
 
 			err = fs.Parse(inArgs)
 			if err != nil {
