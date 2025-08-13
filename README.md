@@ -64,7 +64,7 @@ To get help on a command, use the `help` command. Available commands are attribu
 - `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
 - `help`: Get information on a command. Usage: `+help [command]`
 - `readability`: Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: `+readability`
-- `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). Usage: `+retrain [--cm]`
+- `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before the cutoff point. Usage: `+retrain [--cm] [--past <days>]`
 - `about`: Information about hearsay. Usage: `+about`
 
 ## Examples
