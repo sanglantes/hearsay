@@ -19,4 +19,6 @@ func init() {
 	Commands["readability"] = Command{readabilityHandler, readabilityHelp}
 	Commands["retrain"] = Command{retrainHandler, retrainHelp}
 	Commands["about"] = Command{aboutHandler, aboutHelp}
+	Commands["me"] = Command{meHandler, meHelp}
+	Commands["sentiment"] = Command{sentimentHandler, sentimentHelp}
 }

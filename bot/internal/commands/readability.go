@@ -40,12 +40,12 @@ func scoreClass(score float64) string {
 
 func readabilityHandler(args []string, author string, db *sql.DB) string {
 	if !storage.IsOptedIn(author) {
-		return author + ": You must be opted in to use this command. +help opt"
+		return fmt.Sprintf("%s: You must be opted in to use this command. %shelp opt", author, config.CommandPrefix)
 	}
 
 	fulfil, count := storage.FulfilsMessagesCount(author, config.MessageQuota, db)
 	if !fulfil {
-		return fmt.Sprintf("%s: You have too few messages stored to use this command. You have %d/%d messages.", author, count, config.MessageQuota)
+		return fmt.Sprintf("%s: You have too few messages stored to use this command (%d/%d required).", author, count, config.MessageQuota)
 	}
 
 	url := fmt.Sprintf("http://api:8111/readability?nick=%s", author)

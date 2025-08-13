@@ -35,7 +35,7 @@ var lastRetrain = time.Now().Add(-2 * time.Hour)
 
 func retrainHandler(args []string, author string, db *sql.DB) string {
 	if !storage.IsOptedIn(author) {
-		return author + ": You must be opted in to use this command. +help opt"
+		return fmt.Sprintf("%s: You must be opted in to use this command. %shelp opt", author, config.CommandPrefix)
 	}
 
 	if !storage.EnoughFulfilsMessagesCount(config.PeopleQuota, config.MessageQuota, db) {

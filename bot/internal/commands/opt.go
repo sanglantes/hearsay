@@ -49,9 +49,9 @@ func optHandler(args []string, author string, db *sql.DB) string {
 	}
 
 	if opt[args[0]] {
-		delete(storage.OptOuts, author)
+		delete(storage.OptIns, author)
 	} else {
-		storage.OptOuts[author] = struct{}{}
+		storage.OptIns[author] = struct{}{}
 	}
 	return author + ": You have successfully opted " + args[0] + "."
 }

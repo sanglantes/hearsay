@@ -7,10 +7,10 @@ import (
 // We keep a map of opt-outs. This prevents database lookups.
 // This approach works fine for smaller servers.
 
-var OptOuts = make(map[string]struct{}) // TODO: Add mutex if this is used in more than one place.
+var OptIns = make(map[string]struct{}) // TODO: Add mutex if this is used in more than one place.
 
 func IsOptedIn(nick string) bool {
-	if _, exists := OptOuts[nick]; exists {
+	if _, exists := OptIns[nick]; exists {
 		return true
 	}
 	return false
@@ -28,7 +28,7 @@ func LoadOptIns(db *sql.DB) error {
 		if err := res.Scan(&nick); err != nil {
 			return err
 		}
-		OptOuts[nick] = struct{}{}
+		OptIns[nick] = struct{}{}
 	}
 
 	return nil

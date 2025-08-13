@@ -4,3 +4,4 @@ textstat
 scikit-learn
 matplotlib
 requests
+vaderSentiment

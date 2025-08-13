@@ -17,7 +17,7 @@ def preprocess_remove_garbage(author_message: list[str]) -> list[str]:
     return cleaned
 
 def flesch_score(nick: str) -> float:
-    author_text = preprocess_remove_garbage(database.get_messages_from_nick(nick, database.get_db_timestamp()))
+    author_text = preprocess_remove_garbage(database.get_messages_from_nick(nick))
     author_text = '. '.join(author_text)
     flesch_result: float = textstat.flesch_reading_ease(author_text)
     

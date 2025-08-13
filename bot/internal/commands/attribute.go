@@ -20,7 +20,7 @@ type attributeResponse struct {
 
 func attributeHandler(args []string, author string, db *sql.DB) string {
 	if !storage.IsOptedIn(author) {
-		return author + ": You must be opted in to use this command. +help opt"
+		return fmt.Sprintf("%s: You must be opted in to use this command. %shelp opt", author, config.CommandPrefix)
 	}
 
 	if !storage.EnoughFulfilsMessagesCount(config.PeopleQuota, config.MessageQuota, db) {
@@ -52,7 +52,7 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Printf("Failed to send GET request in attribute for %s: %s\n", author, err.Error())
+		log.Printf("Failed to send POST request in attribute for %s: %s\n", author, err.Error())
 		return author + ": Failed to fetch results."
 	}
 

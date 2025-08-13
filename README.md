@@ -11,8 +11,10 @@ An authorship attribution and NLP bot for IRC. Built in Go (1.24.4) and Python 3
 
 ## Features
 - Store and track messages from IRC channels
-- Attribute a given message to the most likely user (`+attribute <message>`)
-- Flesch-Kincaid readability scores (`+readability`)
+- Attribute a given message to the most likely user
+- Flesch-Kincaid readability scores
+- Sentiment analysis of nicks and messages
+- Stylistic neighbours based on confusion matrices
 - Extensive opt and privacy features (opt-out by default)
 - Go-based IRC handling. Python-based NLP processing
 
@@ -56,7 +58,7 @@ scheduler:
 
 ## Usage
 
-To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, and about.
+To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, about, sentiment, and me.
 
 - `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: `+attribute <message>`
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
@@ -64,8 +66,10 @@ To get help on a command, use the `help` command. Available commands are attribu
 - `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
 - `help`: Get information on a command. Usage: `+help [command]`
 - `readability`: Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: `+readability`
-- `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before the cutoff point. Usage: `+retrain [--cm] [--past <days>]`
+- `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before cutoff. Usage: `+retrain [--cm] [--past <days>]`
 - `about`: Information about hearsay. Usage: `+about`
+- `sentiment`: Extract the sentiment (positive, neutral, or negative) from a message. Usage: `+sentiment <message>`
+- `me`: Statistics about yourself. Usage: `+me`
 
 ## Examples
 ### Retraining the model

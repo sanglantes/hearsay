@@ -5,28 +5,19 @@ from collections import defaultdict
 
 memory = Memory("./cache")
 
-dp = "/app/data/database.db"
+DP = "/app/data/database.db"
+DB_TIMESTAMP = lambda: int(os.path.getmtime(DP)) // 1000
 
-def get_connection(db_path: str = dp) -> sqlite3.Connection:
-    return sqlite3.connect(db_path)
+def get_connection() -> sqlite3.Connection:
+    return sqlite3.connect(DP)
 
-def get_db_timestamp(db_path: str = dp) -> int:
-    """
-    The purpose of this function is to invalidate cache by checking database updates.
-    If the message pool limit is low, this function is generally needless.
-    
-    Heavy(ier) functions will use get_db_timestamp if and only if it uses @memory.cache
-    """
-
-    return int(os.path.getmtime(db_path)) // 1000 # We add a 1000 second leniency
-
-def get_nicks_with_x_plus_messages(x: int, db_path: str = dp) -> list[str]:
-    with sqlite3.connect(db_path) as conn:
+def get_nicks_with_x_plus_messages(x: int) -> list[str]:
+    with sqlite3.connect(DP) as conn:
         res = conn.execute("SELECT nick FROM messages GROUP BY nick HAVING COUNT(*) > ?", (x,))
         return [u[0] for u in res]
     
 @memory.cache
-def get_messages_with_x_plus_messages(x: int, cf: int, db_path: str = dp) -> dict[str, list[str]]:
+def get_messages_with_x_plus_messages(x: int, cf: int, DBT: int = DB_TIMESTAMP()) -> dict[str, list[str]]:
     author_message = defaultdict(list)
     
     base_query = """
@@ -55,7 +46,7 @@ def get_messages_with_x_plus_messages(x: int, cf: int, db_path: str = dp) -> dic
         """
         params.append(cf)
     
-    with sqlite3.connect(db_path) as conn:
+    with sqlite3.connect(DP) as conn:
         res = conn.execute(base_query, params)
         for nick, message in res:
             author_message[nick].append(message)
@@ -63,13 +54,13 @@ def get_messages_with_x_plus_messages(x: int, cf: int, db_path: str = dp) -> dic
     return author_message
 
 @memory.cache
-def get_messages_from_nick(nick: str, db_time: int, db_path: str = dp) -> list[str]:
-    with sqlite3.connect(db_path) as conn:
+def get_messages_from_nick(nick: str, DBT: int = DB_TIMESTAMP()) -> list[str]:
+    with sqlite3.connect(DP) as conn:
         res = conn.execute("SELECT message FROM messages WHERE nick = ? ORDER BY id DESC LIMIT 10000", (nick,))
         return [msg[0] for msg in res]
 
-def is_nick_eligible(count: int, nick: str, db_path: str = dp) -> bool:
-    with sqlite3.connect(db_path) as conn:
+def is_nick_eligible(count: int, nick: str) -> bool:
+    with sqlite3.connect(DP) as conn:
         res = conn.execute("""SELECT
                            COUNT(*)
                            FROM messages m
