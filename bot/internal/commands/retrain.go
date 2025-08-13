@@ -34,7 +34,7 @@ type retrainResponse struct {
 var lastRetrain = time.Now().Add(-2 * time.Hour)
 
 func retrainHandler(args []string, author string, db *sql.DB) string {
-	if storage.IsOptedOut(author) {
+	if !storage.IsOptedIn(author) {
 		return author + ": You must be opted in to use this command. +help opt"
 	}
 
@@ -101,4 +101,4 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 	return responseOne
 }
 
-var retrainHelp string = `Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore older messages, provide the --past flag together with the number of days of inactivity before the cutoff point. Usage: ` + config.CommandPrefix + `retrain [--cm] [--past <days>]`
+var retrainHelp string = `Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before the cutoff point. Usage: ` + config.CommandPrefix + `retrain [--cm] [--past <days>]`

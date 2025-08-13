@@ -39,7 +39,7 @@ func scoreClass(score float64) string {
 }
 
 func readabilityHandler(args []string, author string, db *sql.DB) string {
-	if storage.IsOptedOut(author) {
+	if !storage.IsOptedIn(author) {
 		return author + ": You must be opted in to use this command. +help opt"
 	}
 

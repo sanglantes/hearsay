@@ -42,9 +42,10 @@ func main() {
 	/*err = data.ImportLogs(db, "data/logs.txt")
 	if err != nil {
 		fmt.Println("err returned", err.Error())
-	}*/
+	}
+	os.Exit(0)*/
 
-	if err = storage.LoadOptOuts(db); err != nil {
+	if err = storage.LoadOptIns(db); err != nil {
 		log.Fatalf("Failed loading opt-out map: %s\n", err.Error())
 	} else {
 		log.Println("Passed opt-out loading.")
