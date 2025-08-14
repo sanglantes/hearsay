@@ -93,7 +93,7 @@ To get help on a command, use the `help` command. Available commands are attribu
 ```
 
 ## Limitations
-The nature of IRC messages (short and often fruitless in information) pose a challenge to authorship attribution. hearsay uses an instance-based, per-message model, including short ones messages. This introduces a lot of noise in the training data. To circumvent this, profiles were created. With profiles, it is possible to append more than one message to be attributed. You can expect a 30%+ accuracy boost depending on the size of a profile and author population.
+The nature of IRC messages (short and often fruitless in information) pose a challenge to authorship attribution. hearsay uses an instance-based, per-message model, including short messages. This introduces a lot of noise in the training data. To circumvent this, profiles were created. With profiles, it is possible to append more than one message to be attributed. You can expect a 30%+ accuracy boost depending on the size of a profile and author population.
 
 ## License
 This project is unlicensed. The bot may be used in any and all ways, with or without credit.
