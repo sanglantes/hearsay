@@ -58,5 +58,18 @@ func InitDatabase() (*sql.DB, error) {
 		return nil, err
 	}
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS profiles(
+	id INTEGER PRIMARY KEY,
+	nick TEXT,
+	name TEXT,
+	messages TEXT DEFAULT "",
+	created DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY(nick) REFERENCES users(nick) ON DELETE CASCADE
+	)`)
+	if err != nil {
+		log.Fatalf("Error creating profiles table: %v\n", err.Error())
+		return nil, err
+	}
+
 	return db, nil
 }

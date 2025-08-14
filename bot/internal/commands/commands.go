@@ -21,4 +21,5 @@ func init() {
 	Commands["about"] = Command{aboutHandler, aboutHelp}
 	Commands["me"] = Command{meHandler, meHelp}
 	Commands["sentiment"] = Command{sentimentHandler, sentimentHelp}
+	Commands["profile"] = Command{profileHandler, profileHelp}
 }

@@ -10,7 +10,9 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 from random import shuffle
+from joblib import Memory
 
+memory = Memory()
 
 def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int = 400) -> defaultdict[str, list[str]]:
     cleaned = defaultdict(list)
@@ -128,6 +130,8 @@ def create_pipeline() -> Pipeline:
         ("features", FeatureUnion([
             ("reduced_tfidf", Pipeline([
                 ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4), lowercase=True)),
+                #("word_tfidf", TfidfVectorizer(analyzer="word", ngram_range=(1,3), lowercase=True,
+                #              min_df=2, max_df=0.9))
                 #("sb", SelectKBest(score_func=f_classif, k=1000))
             ])),
             ("punct_freq_dist", CountVectorizer(tokenizer=punctuation_tokenizer,
@@ -147,17 +151,49 @@ def create_pipeline() -> Pipeline:
 
     return pipeline
 
-def get_X_y(min_messages: int, cf: int) -> tuple[list[str], list[str]]:
+def get_X_y(min_messages: int, cf: int = 0) -> tuple[list[str], list[str]]:
     author_messages = preprocess_remove_garbage(
         database.get_messages_with_x_plus_messages(min_messages, cf)
     , min_messages)
+
     X, y = [], []
+
     cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.25)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
             X.append(msg)
             y.append(nick)
+
+    return X, y
+
+@memory.cache
+def get_X_y_block(min_messages: int, cf: int = 0, group_k: int = 10, expire: int = 0) -> tuple[list[str], list[str]]:
+    author_messages = preprocess_remove_garbage(
+        database.get_messages_with_x_plus_messages(min_messages, cf)
+    , min_messages)
+
+    X, y = [], []
+    cap = min(len(v) for v in author_messages.values())
+
+    for nick, msgs in author_messages.items():
+        shuffle(msgs)
+        msgs = msgs[:cap]
+
+        if group_k <= 1:
+            for msg in msgs:
+                X.append(msg)
+                y.append(nick)
+        else:
+            for i in range(0, len(msgs), group_k):
+                block_msgs = msgs[i:i+group_k]
+                if len(block_msgs) == 0:
+                    continue
+                block = "   ".join(block_msgs).strip()
+                if block:
+                    X.append(block)
+                    y.append(nick)
+
     return X, y
 
 
@@ -182,8 +218,9 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
 
 if __name__ == "__main__":
     pipeline = create_pipeline()
-    X, y = get_X_y(400)
+    X, y = get_X_y(400, 14)
     pipeline.fit(X, y)
+    #X, y = get_X_y2(400, 14)
     print(pipeline.named_steps["clf"].classes_)
 
     c = cross_validate(pipeline, X, y, cv=10, scoring=["accuracy", "f1_macro"])

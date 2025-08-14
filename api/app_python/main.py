@@ -11,6 +11,8 @@ import _sentiment
 import joblib
 import time, requests
 
+current_period = lambda: int(time.time() // 7200)
+
 app = FastAPI()
 
 @app.get("/ping")
@@ -100,6 +102,31 @@ def attribute(req: AttributeRequest) -> JSONResponse:
 
     if req.confidence:
         confidence = pipeline.decision_function([req.msg]).tolist()[0]
+
+        labels = map(str, pipeline.named_steps["clf"].classes_)
+
+        conf_map = dict(zip(labels, confidence))
+        conf_map = sorted(conf_map.items(), key=lambda x: x[1], reverse=True)[:3]
+        conf_str = ', '.join(f"{lc[0]}_ ({lc[1]:.2f})" for lc in conf_map)
+
+    return JSONResponse(content={"author": author, "confidence": conf_str})
+
+
+@app.post(
+    "/profile_attribute",
+    summary="Attribute a profile to a chatter."
+)
+def attribute(req: AttributeRequest) -> JSONResponse:
+    import s_retrain
+
+    pipeline = s_retrain.create_pipeline()
+    X, y = s_retrain.get_X_y_block(req.min_messages, 0, len(req.msg.split("/:MSG/")), current_period())
+    pipeline.fit(X, y)
+    
+    author = pipeline.predict([req.msg.replace("/:MSG/", "   ")])[0]
+
+    if req.confidence:
+        confidence = pipeline.decision_function([req.msg.replace("/:MSG/", "   ")]).tolist()[0]
 
         labels = map(str, pipeline.named_steps["clf"].classes_)
 
