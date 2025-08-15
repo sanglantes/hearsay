@@ -7,6 +7,7 @@ An authorship attribution and NLP bot for IRC. Built in Go (1.24.4) and Python 3
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Examples](#examples)
+- [Limitations](#limitations)
 - [License](#license)
 
 ## Features
@@ -58,7 +59,7 @@ scheduler:
 
 ## Usage
 
-To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, about, sentiment, and me.
+To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, about, sentiment, me, and profile.
 
 - `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: `+attribute <message>`
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
