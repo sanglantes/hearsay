@@ -208,4 +208,4 @@ func profileHandler(args []string, author string, db *sql.DB) string {
 	return fmt.Sprintf("%s: Invalid argument: %s. See %shelp profile.", author, args[0], config.CommandPrefix)
 }
 
-var profileHelp string = `Build author profiles that provide higher attribution accuracy. Usage: ` + config.CommandPrefix + `profile (create|destroy|inspect) <name> | append <name> <message> | list`
+var profileHelp string = `Build author profiles that provide higher attribution accuracy. Usage: ` + config.CommandPrefix + `profile (attribute|create|destroy) <name> | append <name> <message> | list`

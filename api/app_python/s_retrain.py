@@ -1,4 +1,5 @@
 from collections import defaultdict
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import cross_val_predict, cross_validate
@@ -120,32 +121,77 @@ class POSTagging(BaseEstimator, TransformerMixin):
             author_pos.append(posses)
 
         return np.array(author_pos)
+    
+
+FUNCTION_WORDS = [
+    'the', 'of', 'and', 'to', 'a', 'in', 'that', 'is', 'was', 'he', 'for', 'it',
+    'with', 'as', 'his', 'on', 'be', 'at', 'by', 'i', 'this', 'had', 'not', 'are',
+    'but', 'from', 'or', 'have', 'an', 'they', 'which', 'one', 'you', 'were',
+    'her', 'all', 'she', 'there', 'would', 'their', 'we', 'him', 'been', 'has',
+    'when', 'who', 'will', 'more', 'no', 'if', 'out', 'so', 'said', 'what', 'up',
+    'its', 'about', 'into', 'than', 'them', 'can', 'only', 'other', 'new', 'some',
+    'could', 'time', 'these', 'two', 'may', 'then', 'do', 'first', 'any', 'my',
+    'now', 'such', 'like', 'our', 'over', 'man', 'me', 'even', 'most', 'made',
+    'after', 'also', 'did', 'many', 'before', 'must', 'through', 'back', 'years',
+    'where', 'much', 'your', 'way', 'well', 'down'
+]
+class FunctionWordVectorizer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.words = FUNCTION_WORDS
+        self.word_to_idx = {w:e for e, w in enumerate(self.words)}
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        vectors = np.zeros((len(X), len(self.words)), dtype=float)
+        for i, doc in enumerate(X):
+            tokens = re.findall(r"\w+", doc.lower())
+            total_tokens = len(tokens) if tokens else 1
+            for token in tokens:
+                if token in self.word_to_idx:
+                    vectors[i, self.word_to_idx[token]] += 1
+            vectors[i] /= total_tokens
+
+        return vectors
 
 
 def punctuation_tokenizer(text: str) -> list[str]:
     return re.findall(r'\.\.\.|[\?\!]{2,}|[.,;:!?\'"-]', text)
 
-def create_pipeline() -> Pipeline:
-    pipeline = Pipeline([
-        ("features", FeatureUnion([
-            ("reduced_tfidf", Pipeline([
-                ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4), lowercase=True)),
-                #("word_tfidf", TfidfVectorizer(analyzer="word", ngram_range=(1,3), lowercase=True,
-                #              min_df=2, max_df=0.9))
-                #("sb", SelectKBest(score_func=f_classif, k=1000))
-            ])),
-            ("punct_freq_dist", CountVectorizer(tokenizer=punctuation_tokenizer,
-                                                vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
-                                                token_pattern=None)),
-            ("caps", Capitalization()),
-            ("pos", POSTagging())
-        ],
-        transformer_weights={
-            "caps": 1.5, 
-            "punct_freq_dist": 1.3, 
-            "reduced_tfidf": 0.7,
-        }
+def create_pipeline(group_k: int = 1) -> Pipeline:
+    if group_k > 1:
+        reduced_tfidf = Pipeline([
+            ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
+            ("select_k_best", SelectKBest(score_func=f_classif, k=3000))
+        ])
+    else:
+        reduced_tfidf = Pipeline([
+            ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
+        ])
+
+    features = [
+        ("reduced_tfidf", reduced_tfidf),
+        ("punct_freq_dist", CountVectorizer(
+            tokenizer=punctuation_tokenizer,
+            vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
+            token_pattern=None
         )),
+        ("caps", Capitalization()),
+        ("pos", POSTagging())
+    ]
+
+    if group_k > 1:
+        features.append(("func_words", FunctionWordVectorizer()))
+
+    transformer_weights = {
+        "caps": 1.15,
+        "punct_freq_dist": 1.1,
+        "reduced_tfidf": 1
+    }
+
+    pipeline = Pipeline([
+        ("features", FeatureUnion(features, transformer_weights=transformer_weights)),
         ("clf", LinearSVC(class_weight="balanced"))
     ])
 
@@ -174,7 +220,7 @@ def get_X_y_block(min_messages: int, cf: int = 0, group_k: int = 10, expire: int
     , min_messages)
 
     X, y = [], []
-    cap = min(len(v) for v in author_messages.values())
+    cap = min_messages
 
     for nick, msgs in author_messages.items():
         shuffle(msgs)
@@ -217,11 +263,11 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
     plt.savefig(filename, dpi=300)
 
 if __name__ == "__main__":
-    pipeline = create_pipeline()
-    X, y = get_X_y(400, 14)
+    pipeline = create_pipeline(5)
+    X, y = get_X_y_block(400, 5, 5)
     pipeline.fit(X, y)
     #X, y = get_X_y2(400, 14)
     print(pipeline.named_steps["clf"].classes_)
 
-    c = cross_validate(pipeline, X, y, cv=10, scoring=["accuracy", "f1_macro"])
+    c = cross_validate(pipeline, X, y, cv=5, scoring=["accuracy", "f1_macro"])
     print(f"accuracy:\t{c['test_accuracy'].mean()}\nf1:\t{c['test_f1_macro'].mean()}")

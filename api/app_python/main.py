@@ -119,8 +119,9 @@ def attribute(req: AttributeRequest) -> JSONResponse:
 def attribute(req: AttributeRequest) -> JSONResponse:
     import s_retrain
 
-    pipeline = s_retrain.create_pipeline()
-    X, y = s_retrain.get_X_y_block(req.min_messages, 0, len(req.msg.split("/:MSG/")), current_period())
+    group_k = len(req.msg.split("/:MSG/"))
+    pipeline = s_retrain.create_pipeline(group_k)
+    X, y = s_retrain.get_X_y_block(req.min_messages, 0, group_k, current_period())
     pipeline.fit(X, y)
     
     author = pipeline.predict([req.msg.replace("/:MSG/", "   ")])[0]

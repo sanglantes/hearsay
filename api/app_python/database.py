@@ -17,7 +17,7 @@ def get_nicks_with_x_plus_messages(x: int) -> list[str]:
         return [u[0] for u in res]
     
 @memory.cache
-def get_messages_with_x_plus_messages(x: int, cf: int, DBT: int = DB_TIMESTAMP()) -> dict[str, list[str]]:
+def get_messages_with_x_plus_messages(x: int, cf: int = 0, DBT: int = DB_TIMESTAMP()) -> dict[str, list[str]]:
     author_message = defaultdict(list)
     
     base_query = """
