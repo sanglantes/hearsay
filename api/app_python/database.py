@@ -21,30 +21,39 @@ def get_messages_with_x_plus_messages(x: int, cf: int = 0, DBT: int = DB_TIMESTA
     author_message = defaultdict(list)
     
     base_query = """
-        SELECT m.nick, m.message 
-        FROM messages m
-        JOIN users u ON m.nick = u.nick
-        WHERE u.opt = 1
-          AND m.nick IN (
-            SELECT nick
-            FROM messages
-            GROUP BY nick
-            HAVING COUNT(*) > ?
-          )
+        SELECT nick, message
+        FROM (
+            SELECT m.nick, m.message,
+                   ROW_NUMBER() OVER (PARTITION BY m.nick ORDER BY m.time DESC) AS rn
+            FROM messages m
+            JOIN users u ON m.nick = u.nick
+            WHERE u.opt = 1
     """
-    
-    params = [x]
-    
+
+    params = []
+
     if cf > 0:
         base_query += """
-          AND m.nick IN (
+            AND m.nick IN (
+                SELECT nick
+                FROM messages
+                GROUP BY nick
+                HAVING MAX(time) > datetime('now', '-' || ? || ' days')
+            )
+        """
+        params.append(cf)
+
+    base_query += """
+        ) t
+        JOIN (
             SELECT nick
             FROM messages
             GROUP BY nick
-            HAVING MAX(time) > datetime('now', '-' || ? || ' days')
-          )
-        """
-        params.append(cf)
+            HAVING COUNT(*) >= ?
+        ) eligible ON t.nick = eligible.nick
+        WHERE rn <= 8500
+    """
+    params.append(x)
     
     with sqlite3.connect(DP) as conn:
         res = conn.execute(base_query, params)
