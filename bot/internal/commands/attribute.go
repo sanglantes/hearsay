@@ -18,6 +18,10 @@ type attributeResponse struct {
 	ConfidenceScore string `json:"confidence"`
 }
 
+type attributeListResponse struct {
+	Authors string `json:"authors"`
+}
+
 func attributeHandler(args []string, author string, db *sql.DB) string {
 	if !storage.IsOptedIn(author) {
 		return fmt.Sprintf("%s: You must be opted in to use this command. %shelp opt", author, config.CommandPrefix)
@@ -29,6 +33,35 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 
 	if len(args) == 0 {
 		return author + ": You cannot attribute an empty message."
+	}
+
+	if args[0] == "--list" {
+		req, err := http.NewRequest(http.MethodGet, "http://api:8111/attribute_list", nil)
+		if err != nil {
+			log.Printf("Failed to get retrain URL for %s: %s\n", author, err.Error())
+			return author + ": Failed to fetch results."
+		}
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Printf("Failed to send GET request in attribue for %s: %s\n", author, err.Error())
+			return author + ": Failed to fetch results."
+		}
+
+		resBody, err := io.ReadAll(res.Body)
+		if err != nil {
+			log.Printf("Failed to read response body in attribute for %s: %s\n", author, err.Error())
+			return author + ": Failed to fetch results."
+		}
+
+		var result attributeListResponse
+		err = json.Unmarshal(resBody, &result)
+		if err != nil {
+			log.Printf("Failed to unmarshal response body in attribute for %s: %s\n", author, err.Error())
+			return author + ": Failed to fetch results."
+		}
+
+		return fmt.Sprintf("%s: Here is a list of nicks currently in the model's scope of view: %s", author, result.Authors)
 	}
 
 	msg := strings.Join(args, " ")
@@ -72,4 +105,4 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 	return fmt.Sprintf("%s: Predicted author: %s_. Confidence scores: %s", author, result.Author, result.ConfidenceScore)
 }
 
-var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: ` + config.CommandPrefix + `attribute <message>`
+var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: ` + config.CommandPrefix + `attribute (--list|<message>)`

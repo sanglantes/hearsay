@@ -51,6 +51,7 @@ def retrain(
     pipeline.fit(X, y)
     elapsed = time.time() - start
     joblib.dump(pipeline, "/app/data/pipeline.joblib")
+    joblib.dump(pipeline.named_steps["clf"].classes_.astype(str), "/app/data/labels.joblib")
 
     url = ""
     accuracy = 0.0
@@ -59,7 +60,6 @@ def retrain(
         cm_table, labels, accuracy, f1 = s_retrain.evaluate_pipeline(pipeline, X, y)
         
         joblib.dump(cm_table, "/app/data/cm_table.joblib") # Used for me command.
-        joblib.dump(labels, "/app/data/labels.joblib")
 
         s_retrain.plot_and_save_confusion_matrix(cm_table, labels)
         with open("cm.png", "rb") as f:
@@ -136,6 +136,20 @@ def attribute(req: AttributeRequest) -> JSONResponse:
         conf_str = ', '.join(f"{lc[0]}_ ({lc[1]:.2f})" for lc in conf_map)
 
     return JSONResponse(content={"author": author, "confidence": conf_str})
+
+
+@app.get(
+    "/attribute_list",
+    summary="List current nicks in the model."
+)
+def attribute_list() -> JSONResponse:
+    try:
+        labels = joblib.load("/app/data/labels.joblib")
+        return JSONResponse(content={"authors":', '.join(labels)})
+    except FileNotFoundError:
+        return JSONResponse(content={"authors": "No nicks were found. Retrain the model."})
+    except Exception as e:
+        return JSONResponse(content={"authors": str(e)})
 
 
 class sentimentRequest(BaseModel):
