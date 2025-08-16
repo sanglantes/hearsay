@@ -37,23 +37,6 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int =
 
     return cleaned_final
 
-"""
-class WordLengthDistribution(BaseEstimator, TransformerMixin):
-    def fit(self, X, y=None):
-        return self
-    
-    def transform(self, X):
-        result = []
-        for msg in X:
-            dist = [0] * 30
-            words = re.findall(r'\b\w+\b', msg)
-            for word in words:
-                length = min(len(word), 29)
-                dist[length] += 1
-            result.append(dist)
-
-        return np.array(result)
-"""
 
 class Capitalization(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -62,14 +45,17 @@ class Capitalization(BaseEstimator, TransformerMixin):
     def transform(self, X):
         caps = []
         for msg in X:
-            sentences = re.split(r"[\.?!]", msg)
-            cntr = 0
-            for s in sentences:
-                s = s.lstrip()
-                if s and s[0].isupper():
-                    cntr += 1
-            caps.append([cntr])
-        
+            sentences = [s.strip() for s in re.split(r"[\.?!]", msg) if s.strip()]
+            total = len(sentences)
+            cntr = sum(1 for s in sentences if s[0].isupper())
+
+            if total > 0:
+                value = cntr / total
+            else:
+                value = 0.0
+
+            caps.append([value])
+
         return np.array(caps)
 
 
@@ -118,22 +104,29 @@ class POSTagging(BaseEstimator, TransformerMixin):
             posses = [0] * 21
             for token in doc:
                 posses[self.posmap[token.pos_]] += 1
+
+            total = sum(posses)
+            if total > 0:
+                posses = [count / total for count in posses]
+
             author_pos.append(posses)
 
         return np.array(author_pos)
     
 
 FUNCTION_WORDS = [
-    'the', 'of', 'and', 'to', 'a', 'in', 'that', 'is', 'was', 'he', 'for', 'it',
-    'with', 'as', 'his', 'on', 'be', 'at', 'by', 'i', 'this', 'had', 'not', 'are',
-    'but', 'from', 'or', 'have', 'an', 'they', 'which', 'one', 'you', 'were',
-    'her', 'all', 'she', 'there', 'would', 'their', 'we', 'him', 'been', 'has',
-    'when', 'who', 'will', 'more', 'no', 'if', 'out', 'so', 'said', 'what', 'up',
-    'its', 'about', 'into', 'than', 'them', 'can', 'only', 'other', 'new', 'some',
-    'could', 'time', 'these', 'two', 'may', 'then', 'do', 'first', 'any', 'my',
-    'now', 'such', 'like', 'our', 'over', 'man', 'me', 'even', 'most', 'made',
-    'after', 'also', 'did', 'many', 'before', 'must', 'through', 'back', 'years',
-    'where', 'much', 'your', 'way', 'well', 'down'
+    'the', 'which', 'and', 'up', 'nobody', 'of', 'being', 'himself', 'to',
+    'would', 'must', 'mine', 'a', 'when', 'another', 'anybody', 'i', 'your',
+    'till', 'in', 'will', 'might', 'herself', 'you', 'their', 
+    'that', 'who', 'someone', 'it', 'some', 'whatever', 'for', 'among', 
+    'whom', 'he', 'because', 'while', 'on', 'how', 'each', 'we', 'other', 
+    'nor', 'they', 'could', 'be', 'our', 'every', 'most', 'with', 'this', 
+    'these', 'shall', 'have', 'than', 'few', 'myself', 'but', 'any', 'though', 
+    'themselves', 'as', 'where', 'itself', 'not', 'somebody', 'at', 'what', 'so', 
+    'there', 'or', 'its', 'therefore', 'should', 'everybody', 'by', 'from', 'those', 
+    'however', 'thus', 'all', 'may', 'everyone', 'she', 'yet', 'whether', 'his', 
+    'everything', 'do', 'yourself', 'can', 'if', 'whose', 'such', 'anyone', 
+    'my', 'per', 'her', 'either'
 ]
 class FunctionWordVectorizer(BaseEstimator, TransformerMixin):
     def __init__(self):
@@ -204,7 +197,7 @@ def get_X_y(min_messages: int, cf: int = 0) -> tuple[list[str], list[str]]:
 
     X, y = [], []
 
-    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.25)
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.2)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
@@ -264,7 +257,7 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
 
 if __name__ == "__main__":
     pipeline = create_pipeline(5)
-    X, y = get_X_y_block(400, 5, 5)
+    X, y = get_X_y(500, 5)
     pipeline.fit(X, y)
     #X, y = get_X_y2(400, 14)
     print(pipeline.named_steps["clf"].classes_)
