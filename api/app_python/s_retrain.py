@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -112,7 +113,6 @@ class POSTagging(BaseEstimator, TransformerMixin):
             author_pos.append(posses)
 
         return np.array(author_pos)
-    
 
 FUNCTION_WORDS = [
     'the', 'which', 'and', 'up', 'nobody', 'of', 'being', 'himself', 'to',
@@ -171,7 +171,7 @@ def create_pipeline(group_k: int = 1) -> Pipeline:
             token_pattern=None
         )),
         ("caps", Capitalization()),
-        ("pos", POSTagging())
+        #("pos", POSTagging())
     ]
 
     if group_k > 1:
@@ -257,7 +257,7 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
 
 if __name__ == "__main__":
     pipeline = create_pipeline(5)
-    X, y = get_X_y(500, 5)
+    X, y = get_X_y_block(500, 4, 3)
     pipeline.fit(X, y)
     #X, y = get_X_y2(400, 14)
     print(pipeline.named_steps["clf"].classes_)
