@@ -5,7 +5,7 @@ from collections import defaultdict
 
 memory = Memory("./cache")
 
-DP = "database.db"
+DP = "/app/data/database.db"
 DB_TIMESTAMP = lambda: int(os.path.getmtime(DP)) // 1000
 
 def get_connection() -> sqlite3.Connection:
