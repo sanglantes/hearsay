@@ -124,7 +124,7 @@ func appendProfile(args []string, author string, db *sql.DB) string {
 		return fmt.Sprintf("%s: Failed to append message to profile", author)
 	}
 
-	return fmt.Sprintf("%s: Successfully appended messsage", author)
+	return ""
 }
 
 func getMessagesFromProfile(name string, author string, db *sql.DB) (string, error) {

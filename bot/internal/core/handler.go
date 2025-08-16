@@ -67,7 +67,10 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 
 				go func(rCmd string, rArgs []string, rAuthor string, rChannel string) {
 					if cmd, ok := commands.Commands[rCmd]; ok {
-						c.Privmsg(rChannel, cmd.Handler(rArgs, rAuthor, db))
+						result := cmd.Handler(rArgs, rAuthor, db)
+						if result != "" {
+							c.Privmsg(rChannel, result)
+						}
 					} else {
 						c.Privmsgf(rChannel, "No such command: %s", rCmd)
 					}
