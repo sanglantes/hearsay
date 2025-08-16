@@ -61,7 +61,7 @@ scheduler:
 
 To get help on a command, use the `help` command. Available commands are attribute, opt, forget, unforget, help, readability, retrain, about, sentiment, me, and profile.
 
-- `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: `+attribute <message>`
+- `attribute`: Attribute a message to a chatter who is opted in and fulfils the message quota. To view the model's scope of view, use the --list flag. Usage: `+attribute (--list|<message>)`
 - `opt`:  Opt in or out from data collection and model training. If no arguments are submitted, your current opt status will be returned. Usage: `+opt [in|out] (default: out)`
 - `forget`: Permanently purge all your data. Usage: `+forget`
 - `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
@@ -74,23 +74,34 @@ To get help on a command, use the `help` command. Available commands are attribu
 - `profile`: Build author profiles that provide higher attribution accuracy. Usage: `+profile (attribute|create|destroy) <name> | append <name> <message> | list`
 
 ## Examples
-### Retraining the model
+### Retrain
 ```
-<katt> +retrain --cm
-<hearsay> katt: The SVM model has been retrained. It took 4.83 seconds to fit. Confusion matrix: http://tmpfiles.org/9753032/cm.png | 5-fold CV: Accuracy 0.5552, F1 score 0.5590
+<katt> +retrain --cm --past 7
+<hearsay> katt: The SVM model has been retrained. It took 22.31 seconds to fit. Confusion matrix: http://tmpfiles.org/10579119/cm.png | 5-fold CV: Accuracy 0.5923, F1 score 0.580
 ```
 ![Confusion matrix](/misc/cm.png)
 
 ### Attribution
 ```
-<Menchers> +attribute \o
-<hearsay> Menchers: Predicted author: morph_. Confidence scores: morph_ (-0.12), Menchers_ (-0.66), tonitrus_ (-0.79)
+<katt> +attribute i hope you had a good weekend
+<hearsay> katt: Predicted author: morph_. Confidence scores: morph_ (0.56), ack_ (0.09), tonitrus_ (-1.02)
 ```
 
 ### Readability
 ```
 <katt> +readability
 <hearsay> katt: You have a Flesch-Kincaid score of 82.06 (6th grade level. Easy to read. Conversational English for consumers.)
+```
+
+### Sentiment
+```
+<katt> +sentiment I hate my job
+<hearsay> katt: Largely negative with a compound score of -0.57. (pos: 0.00, neu: 0.45, neg: 0.55)
+```
+
+### Me
+```
+katt: Message count: 9001/400 | Readability: 82.01 | Sentiment: 0.10 (Positive) | Neighbour: gothdaria_
 ```
 
 ## Limitations

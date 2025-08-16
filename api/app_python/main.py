@@ -145,7 +145,7 @@ def attribute(req: AttributeRequest) -> JSONResponse:
 def attribute_list() -> JSONResponse:
     try:
         labels = joblib.load("/app/data/labels.joblib")
-        return JSONResponse(content={"authors":', '.join(labels)})
+        return JSONResponse(content={"authors":'_, '.join(labels)+'_'})
     except FileNotFoundError:
         return JSONResponse(content={"authors": "No nicks were found. Retrain the model."})
     except Exception as e:

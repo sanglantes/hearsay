@@ -105,4 +105,4 @@ func attributeHandler(args []string, author string, db *sql.DB) string {
 	return fmt.Sprintf("%s: Predicted author: %s_. Confidence scores: %s", author, result.Author, result.ConfidenceScore)
 }
 
-var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. Usage: ` + config.CommandPrefix + `attribute (--list|<message>)`
+var attributeHelp string = `Attribute a message to a chatter who is opted in and fulfils the message quota. To view the model's scope of view, use the --list flag. Usage: ` + config.CommandPrefix + `attribute (--list|<message>)`
