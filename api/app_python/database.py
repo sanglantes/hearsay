@@ -5,7 +5,7 @@ from collections import defaultdict
 
 memory = Memory("./cache")
 
-DP = "/app/data/database.db"
+DP = "database.db"
 DB_TIMESTAMP = lambda: int(os.path.getmtime(DP)) // 1000
 
 def get_connection() -> sqlite3.Connection:
@@ -19,48 +19,37 @@ def get_nicks_with_x_plus_messages(x: int) -> list[str]:
 @memory.cache
 def get_messages_with_x_plus_messages(x: int, cf: int = 0, DBT: int = DB_TIMESTAMP()) -> dict[str, list[str]]:
     author_message = defaultdict(list)
-    
+
     base_query = """
-        SELECT nick, message
-        FROM (
-            SELECT m.nick, m.message,
-                   ROW_NUMBER() OVER (PARTITION BY m.nick ORDER BY m.time DESC) AS rn
+        WITH eligible_authors AS (
+            SELECT m.nick
             FROM messages m
             JOIN users u ON m.nick = u.nick
             WHERE u.opt = 1
-    """
-
-    params = []
-
-    if cf > 0:
-        base_query += """
-            AND m.nick IN (
-                SELECT nick
-                FROM messages
-                GROUP BY nick
-                HAVING MAX(time) > datetime('now', '-' || ? || ' days')
-            )
-        """
-        params.append(cf)
-
-    base_query += """
-        ) t
-        JOIN (
-            SELECT nick
-            FROM messages
-            GROUP BY nick
-            HAVING COUNT(*) >= ?
-        ) eligible ON t.nick = eligible.nick
+            GROUP BY m.nick
+            HAVING COUNT(*) >= ? 
+               AND (? = 0 OR MAX(m.time) > datetime('now', '-' || ? || ' days'))
+        ),
+        ranked_messages AS (
+            SELECT m.nick,
+                   m.message,
+                   ROW_NUMBER() OVER (PARTITION BY m.nick ORDER BY m.time DESC) AS rn
+            FROM messages m
+            JOIN eligible_authors ea ON m.nick = ea.nick
+        )
+        SELECT nick, message
+        FROM ranked_messages
         WHERE rn <= 8500
     """
-    params.append(x)
-    
+    params = (x, cf, cf)
+
     with sqlite3.connect(DP) as conn:
         res = conn.execute(base_query, params)
         for nick, message in res:
             author_message[nick].append(message)
-    
+
     return author_message
+
 
 @memory.cache
 def get_messages_from_nick(nick: str, DBT: int = DB_TIMESTAMP()) -> list[str]:
