@@ -60,7 +60,7 @@ model:
 - `people_quota`: Before authorship attribution commands can be used, five people must fulfil the `message_quota`. With a lower `people_quota`, the author population becomes less diverse. Five is a good start for small to medium big servers.
 - `deletion_days`: When a user issues the `forget` command, all their data will be purged. To prevent accidental deletions, their request is put on a schedule. After the set amount of days, their data will be purged. Note that `deletion_days` cannot be lower than one.
 - `bert`: Enables text embeddings with Google's BERT language model.
-> [!IMPORTANT]
+> [!NOTE]
 > Using BERT is slow and the accuracy gain is minimal. If you wish to disable it, set this setting to false. However, BERT will still install during installation. This produces some overhead. Remove the line `sentence-transformers` from `api/requirements.txt` to disable it completely. Please note that BERT is not enabled by default if it is set to true. A separate `--bert` flag has to be passed to `+retrain` to use it.
 
 ## Usage
