@@ -73,7 +73,7 @@ To get help on a command, use the `help` command. Available commands are attribu
 - `unforget`: Cancel a scheduled data deletion. Usage: `+unforget`
 - `help`: Get information on a command. Usage: `+help [command]`
 - `readability`: Calculate the Flesch-Kincaid readability score of your messages (10,000 limit). Usage: `+readability`
-- `retrain`: Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before cutoff. Usage: `+retrain [--cm] [--past <days>]`
+- `retrain`: Refit the classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag with the number of days of inactivity before being cut off. To include BERT embeddings, append the --bert flag. NOTE: Using BERT is very slow with minimal accuracy gain. This is compounded when used in conjunction with --cm. Usage: `+retrain [--cm, --bert, --past <days>]`
 - `about`: Information about hearsay. Usage: `+about`
 - `sentiment`: Extract the sentiment (positive, neutral, or negative) from a message. Usage: `+sentiment <message>`
 - `me`: Statistics about yourself. Usage: `+me`
