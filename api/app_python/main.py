@@ -39,12 +39,13 @@ def readability(nick: str) -> JSONResponse:
 def retrain(
     min_messages: int,
     cm: Optional[int] = 0,
-    cf: Optional[int] = 0
+    cf: Optional[int] = 0,
+    bert: Optional[int] = 0
 ) -> JSONResponse:
     import s_retrain
     cm = bool(cm)
 
-    pipeline = s_retrain.create_pipeline()
+    pipeline = s_retrain.create_pipeline(1, bert)
 
     X, y = s_retrain.get_X_y(min_messages, cf)
     start = time.time()

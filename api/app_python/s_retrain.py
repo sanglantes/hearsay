@@ -1,5 +1,4 @@
 from collections import defaultdict
-import os
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -7,6 +6,7 @@ from sklearn.model_selection import cross_val_predict, cross_validate
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.base import BaseEstimator, TransformerMixin
+from sentence_transformers import SentenceTransformer
 import database
 import numpy as np
 import re
@@ -37,6 +37,28 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int =
 
 
     return cleaned_final
+
+
+class BertVectorizer(BaseEstimator, TransformerMixin):
+    def __init__(self, model_name="all-MiniLM-L6-v2", batch_size=64):
+        self.model_name = model_name
+        self.batch_size = batch_size
+        self.model = None
+
+    def fit(self, X, y=None):
+        if self.model is None:
+            self.model = SentenceTransformer(self.model_name)
+        return self
+
+    def transform(self, X):
+        embeddings = self.model.encode(
+            X,
+            batch_size=self.batch_size,
+            show_progress_bar=False,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+        return embeddings
 
 
 class Capitalization(BaseEstimator, TransformerMixin):
@@ -152,7 +174,7 @@ class FunctionWordVectorizer(BaseEstimator, TransformerMixin):
 def punctuation_tokenizer(text: str) -> list[str]:
     return re.findall(r'\.\.\.|[\?\!]{2,}|[.,;:!?\'"-]', text)
 
-def create_pipeline(group_k: int = 1) -> Pipeline:
+def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
     if group_k > 1:
         reduced_tfidf = Pipeline([
             ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
@@ -177,14 +199,11 @@ def create_pipeline(group_k: int = 1) -> Pipeline:
     if group_k > 1:
         features.append(("func_words", FunctionWordVectorizer()))
 
-    transformer_weights = {
-        "caps": 1.15,
-        "punct_freq_dist": 1.1,
-        "reduced_tfidf": 1
-    }
+    if use_bert:
+        features.append(("bert", BertVectorizer()))
 
     pipeline = Pipeline([
-        ("features", FeatureUnion(features, transformer_weights=transformer_weights)),
+        ("features", FeatureUnion(features)),
         ("clf", LinearSVC(class_weight="balanced"))
     ])
 
@@ -197,7 +216,7 @@ def get_X_y(min_messages: int, cf: int = 0) -> tuple[list[str], list[str]]:
 
     X, y = [], []
 
-    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.2)
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.4)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
@@ -256,10 +275,9 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
     plt.savefig(filename, dpi=300)
 
 if __name__ == "__main__":
-    pipeline = create_pipeline(5)
-    X, y = get_X_y_block(500, 4, 3)
+    pipeline = create_pipeline(50)
+    X, y = get_X_y(500, 14)
     pipeline.fit(X, y)
-    #X, y = get_X_y2(400, 14)
     print(pipeline.named_steps["clf"].classes_)
 
     c = cross_validate(pipeline, X, y, cv=5, scoring=["accuracy", "f1_macro"])

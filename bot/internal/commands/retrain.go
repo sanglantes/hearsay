@@ -57,14 +57,15 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 			fs := flag.NewFlagSet("retrainArgs", flag.ContinueOnError)
 
 			cm := fs.Bool("cm", false, "...")
-			cf := fs.Int("past", 0, "...")
+			past := fs.Int("past", 0, "...")
+			bert := fs.Bool("bert", false, "...")
 
 			err = fs.Parse(inArgs)
 			if err != nil {
 				log.Printf("shlex failed to parse arguments in retrain. (query: %s): %s", strings.Join(args, " "), err.Error())
 				url = fmt.Sprintf("http://api:8111/retrain?cm=%d&cf=%d&min_messages=%d", 0, 0, config.MessageQuota)
 			} else {
-				url = fmt.Sprintf("http://api:8111/retrain?cm=%d&cf=%d&min_messages=%d", _boolToInt(*cm), *cf, config.MessageQuota)
+				url = fmt.Sprintf("http://api:8111/retrain?cm=%d&cf=%d&bert=%d&min_messages=%d", _boolToInt(*cm), *past, _boolToInt(*bert), config.MessageQuota)
 			}
 		}
 	}
@@ -101,4 +102,4 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 	return responseOne
 }
 
-var retrainHelp string = `Refit the SVM classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag together with the number of days of inactivity before the cutoff point. Usage: ` + config.CommandPrefix + `retrain [--cm] [--past <days>]`
+var retrainHelp string = `Refit the classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag with the number of days of inactivity before the cutoff point. To include BERT embeddings, append the --bert flag. NOTE: Using BERT is very slow and the accuracy gain is minimal. This is compounded when used in conjunction with --cm. Usage: ` + config.CommandPrefix + `retrain [--cm, --bert, --past <days>]`
