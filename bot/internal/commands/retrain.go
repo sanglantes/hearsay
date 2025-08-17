@@ -59,6 +59,9 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 			cm := fs.Bool("cm", false, "...")
 			past := fs.Int("past", 0, "...")
 			bert := fs.Bool("bert", false, "...")
+			if !(*bert && config.Bert) {
+				return fmt.Sprintf("%s: BERT has been disabled by the administrator.", author)
+			}
 
 			err = fs.Parse(inArgs)
 			if err != nil {
@@ -102,4 +105,4 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 	return responseOne
 }
 
-var retrainHelp string = `Refit the classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag with the number of days of inactivity before the cutoff point. To include BERT embeddings, append the --bert flag. NOTE: Using BERT is very slow and the accuracy gain is minimal. This is compounded when used in conjunction with --cm. Usage: ` + config.CommandPrefix + `retrain [--cm, --bert, --past <days>]`
+var retrainHelp string = `Refit the classification model. This can be done every 2 hours. Add the --cm flag for evaluation statistics (heavy). To ignore inactive nicks, provide the --past flag with the number of days of inactivity before being cut off. To include BERT embeddings, append the --bert flag. NOTE: Using BERT is very slow with minimal accuracy gain. This is compounded when used in conjunction with --cm. Usage: ` + config.CommandPrefix + `retrain [--cm, --bert, --past <days>]`

@@ -6,8 +6,11 @@ bot:
 
 storage:
   message_pool_size: 20
-  message_quota: 400
+  message_quota: 500
   people_quota: 5
 
 scheduler:
   deletion_days: 1
+
+model:
+  bert: true

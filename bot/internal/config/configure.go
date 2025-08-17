@@ -18,6 +18,7 @@ var MaxMessagePool = 30
 var DeletionDays = 1
 var MessageQuota = 100
 var PeopleQuota = 5
+var Bert = true
 
 type BotStruct struct {
 	Prefix  string `yaml:"prefix"`
@@ -36,10 +37,15 @@ type SchedulerStruct struct {
 	DeletionDays int `yaml:"deletion_days"`
 }
 
+type ModelStruct struct {
+	Bert bool `yaml:"bert"`
+}
+
 type ConfigStruct struct {
 	Bot       BotStruct       `yaml:"bot"`
 	Storage   StorageStruct   `yaml:"storage"`
 	Scheduler SchedulerStruct `yaml:"scheduler"`
+	Model     ModelStruct     `yaml:"model"`
 }
 
 func List(v interface{}) {
@@ -93,11 +99,9 @@ func ReadConfig(path string, verbose bool) error {
 	if cfg.Storage.MessagePoolSize > 0 {
 		MaxMessagePool = cfg.Storage.MessagePoolSize
 	}
-
 	if cfg.Storage.MessageQuota > 0 {
 		MessageQuota = cfg.Storage.MessageQuota
 	}
-
 	if cfg.Storage.PeopleQuota > 0 {
 		PeopleQuota = cfg.Storage.PeopleQuota
 	}
@@ -105,6 +109,8 @@ func ReadConfig(path string, verbose bool) error {
 	if cfg.Scheduler.DeletionDays > 0 {
 		DeletionDays = cfg.Scheduler.DeletionDays
 	}
+
+	Bert = cfg.Model.Bert
 
 	if verbose {
 		List(cfg)

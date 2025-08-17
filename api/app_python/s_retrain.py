@@ -6,7 +6,6 @@ from sklearn.model_selection import cross_val_predict, cross_validate
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.base import BaseEstimator, TransformerMixin
-from sentence_transformers import SentenceTransformer
 import database
 import numpy as np
 import re
@@ -46,6 +45,7 @@ class BertVectorizer(BaseEstimator, TransformerMixin):
         self.model = None
 
     def fit(self, X, y=None):
+        from sentence_transformers import SentenceTransformer
         if self.model is None:
             self.model = SentenceTransformer(self.model_name)
         return self

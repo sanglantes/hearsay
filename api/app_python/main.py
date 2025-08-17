@@ -1,3 +1,4 @@
+import importlib
 import os
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -45,6 +46,8 @@ def retrain(
     import s_retrain
     cm = bool(cm)
 
+    if importlib.util.find_spec("sentence_transformers") is None:
+        bert = 0
     pipeline = s_retrain.create_pipeline(1, bert)
 
     X, y = s_retrain.get_X_y(min_messages, cf)
