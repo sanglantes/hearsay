@@ -275,7 +275,7 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
     plt.savefig(filename, dpi=300)
 
 if __name__ == "__main__":
-    pipeline = create_pipeline(50)
+    pipeline = create_pipeline()
     X, y = get_X_y(500, 14)
     pipeline.fit(X, y)
     print(pipeline.named_steps["clf"].classes_)

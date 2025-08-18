@@ -1,6 +1,10 @@
 import database
+from joblib import Memory
 
-def sentiment_over_many_messages(nick: str):
+memory = Memory("./cache")
+
+@memory.cache
+def sentiment_over_many_messages(nick: str, expire: int = 0):
     from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
     
     analyzer = SentimentIntensityAnalyzer()

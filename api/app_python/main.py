@@ -29,7 +29,7 @@ def readability(nick: str) -> JSONResponse:
     import s_readability as s_readability
 
     return JSONResponse({
-        "score": s_readability.flesch_score(nick)
+        "score": s_readability.flesch_score(nick, current_period())
     })
 
 
@@ -190,7 +190,7 @@ def sentiment(req: sentimentRequest):
     summary="Information about you."
 )
 def me(author: str) -> JSONResponse:
-    comp = _sentiment.sentiment_over_many_messages(author)
+    comp = _sentiment.sentiment_over_many_messages(author, current_period())
     if comp >= 0.05:
         hr = "Positive"
     elif -0.05 < comp < 0.05:
@@ -213,7 +213,7 @@ def me(author: str) -> JSONResponse:
         neighbour = "Train the attribution model with evaluation for results."
 
     return JSONResponse(content={
-        "readability": s_readability.flesch_score(author),
+        "readability": s_readability.flesch_score(author, current_period()),
         "sentiment": comp,
         "sentiment_hr": hr,
         "neighbour": neighbour

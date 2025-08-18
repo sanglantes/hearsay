@@ -1,6 +1,9 @@
 import textstat
 import database
 import re
+from joblib import Memory
+
+memory = Memory("./cache")
 
 def preprocess_remove_garbage(author_message: list[str]) -> list[str]:
     cleaned = []
@@ -16,7 +19,8 @@ def preprocess_remove_garbage(author_message: list[str]) -> list[str]:
 
     return cleaned
 
-def flesch_score(nick: str) -> float:
+@memory.cache
+def flesch_score(nick: str, expire: int = 0) -> float:
     author_text = preprocess_remove_garbage(database.get_messages_from_nick(nick))
     author_text = '. '.join(author_text)
     flesch_result: float = textstat.flesch_reading_ease(author_text)
