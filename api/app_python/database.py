@@ -39,7 +39,7 @@ def get_messages_with_x_plus_messages(x: int, cf: int = 0, DBT: int = DB_TIMESTA
         )
         SELECT nick, message
         FROM ranked_messages
-        WHERE rn <= 8500
+        WHERE rn <= 10000
     """
     params = (x, cf, cf)
 

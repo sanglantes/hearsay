@@ -1,5 +1,7 @@
 from collections import defaultdict
+from sklearn.discriminant_analysis import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.linear_model import SGDClassifier
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import cross_val_predict, cross_validate
@@ -204,7 +206,7 @@ def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
 
     pipeline = Pipeline([
         ("features", FeatureUnion(features)),
-        ("clf", LinearSVC(class_weight="balanced"))
+        ("clf", SGDClassifier(loss='hinge', class_weight='balanced', penalty="l2"))
     ])
 
     return pipeline
@@ -216,7 +218,7 @@ def get_X_y(min_messages: int, cf: int = 0) -> tuple[list[str], list[str]]:
 
     X, y = [], []
 
-    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.4)
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*2)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
@@ -276,7 +278,7 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
 
 if __name__ == "__main__":
     pipeline = create_pipeline()
-    X, y = get_X_y(500, 14)
+    X, y = get_X_y(400, 14)
     pipeline.fit(X, y)
     print(pipeline.named_steps["clf"].classes_)
 
