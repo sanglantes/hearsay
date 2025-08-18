@@ -45,32 +45,32 @@ func readabilityHandler(args []string, author string, db *sql.DB) string {
 
 	fulfil, count := storage.FulfilsMessagesCount(author, config.MessageQuota, db)
 	if !fulfil {
-		return fmt.Sprintf("%s: You have too few messages stored to use this command (%d/%d required).", author, count, config.MessageQuota)
+		return fmt.Sprintf("%s: You have too few messages stored to use this command (%d/%d required)", author, count, config.MessageQuota)
 	}
 
 	url := fmt.Sprintf("http://api:8111/readability?nick=%s", author)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Printf("Failed to get readability URL for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("Failed to send GET request in readability for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("Failed to read response body in readability for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 	var result scoreResponse
 	err = json.Unmarshal(resBody, &result)
 	if err != nil {
 		log.Printf("Failed to unmarshal response body in readability for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	return fmt.Sprintf("%s: You have a Flesch-Kincaid score of %.2f (%s)", author, result.Score, scoreClass(result.Score))

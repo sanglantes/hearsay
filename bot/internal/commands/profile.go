@@ -110,7 +110,7 @@ func destroyProfile(args []string, author string, db *sql.DB) string {
 
 func appendProfile(args []string, author string, db *sql.DB) string {
 	if len(args) < 3 {
-		return fmt.Sprintf("%s: Too few arguments supplied.", author)
+		return fmt.Sprintf("%s: Too few arguments supplied", author)
 	}
 
 	exists, _ := profileExists(args[1], author, db)

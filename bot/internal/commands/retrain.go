@@ -39,11 +39,11 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 	}
 
 	if !storage.EnoughFulfilsMessagesCount(config.PeopleQuota, config.MessageQuota, db) {
-		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires %d people with >= %d messages.", author, config.PeopleQuota, config.MessageQuota)
+		return fmt.Sprintf("%s: Not enough people fulfil the message quota. hearsay requires %d people with >= %d messages", author, config.PeopleQuota, config.MessageQuota)
 	}
 
 	if time.Since(lastRetrain) < 2*time.Hour {
-		return author + ": The model has already been retrained within the last 2 hours."
+		return author + ": The model has already been retrained within the last 2 hours"
 	}
 	lastRetrain = time.Now()
 
@@ -59,8 +59,8 @@ func retrainHandler(args []string, author string, db *sql.DB) string {
 			cm := fs.Bool("cm", false, "...")
 			past := fs.Int("past", 0, "...")
 			bert := fs.Bool("bert", false, "...")
-			if !(*bert && config.Bert) {
-				return fmt.Sprintf("%s: BERT has been disabled by the administrator.", author)
+			if *bert && !config.Bert {
+				return fmt.Sprintf("%s: BERT has been disabled by the administrator", author)
 			}
 
 			err = fs.Parse(inArgs)

@@ -23,10 +23,10 @@ func optHandler(args []string, author string, db *sql.DB) string {
 		err := db.QueryRow("SELECT opt FROM users WHERE nick = ?", author).Scan(&optBool)
 
 		if err == sql.ErrNoRows {
-			return author + ": Your nick was not found in the database."
+			return author + ": Your nick was not found in the database"
 		} else if err != nil {
 			log.Printf("%s", err.Error())
-			return author + ": Something went wrong."
+			return author + ": Something went wrong"
 		}
 
 		return fmt.Sprintf("%s: You are currently opted %s.", author, optReverse[optBool])
@@ -39,13 +39,13 @@ func optHandler(args []string, author string, db *sql.DB) string {
 	res, err := db.Exec("UPDATE users SET opt = ? WHERE nick = ?", opt[args[0]], author)
 	if err != nil {
 		log.Printf("Failed updating opt preference: %s\n", err.Error())
-		return author + ": Something went wrong."
+		return author + ": Something went wrong"
 	}
 
 	rA, _ := res.RowsAffected()
 	if rA == 0 {
-		log.Println("In opt command: user not found.")
-		return author + ": Your nick was not found in the database."
+		log.Println("In opt command: user not found")
+		return author + ": Your nick was not found in the database"
 	}
 
 	if opt[args[0]] {

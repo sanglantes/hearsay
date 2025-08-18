@@ -27,7 +27,7 @@ func sentimentHandler(args []string, author string, db *sql.DB) string {
 	}
 
 	if len(args) == 0 {
-		return author + ": You cannot submit an empty message."
+		return author + ": You cannot submit an empty message"
 	}
 
 	msg := strings.Join(args, " ")
@@ -37,13 +37,13 @@ func sentimentHandler(args []string, author string, db *sql.DB) string {
 	postJson, err := json.Marshal(body)
 	if err != nil {
 		log.Printf("Failed to marshal POST request in sentiment by %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	req, err := http.NewRequest(http.MethodPost, "http://api:8111/sentiment", bytes.NewBuffer(postJson))
 	if err != nil {
 		log.Printf("Failed to get sentiment URL for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -56,14 +56,14 @@ func sentimentHandler(args []string, author string, db *sql.DB) string {
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("Failed to read response body in sentiment for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	var result sentimentResponse
 	err = json.Unmarshal(resBody, &result)
 	if err != nil {
 		log.Printf("Failed to unmarshal response body in sentiment for %s: %s\n", author, err.Error())
-		return author + ": Failed to fetch results."
+		return author + ": Failed to fetch results"
 	}
 
 	return fmt.Sprintf("%s: Largely \x02%s\x02 with a compound score of \x02%.2f\x02. (pos: %.2f, neu: %.2f, neg: %.2f)", author, result.HumanReadable, result.Compound, result.Pos, result.Neu, result.Neg)

@@ -16,14 +16,14 @@ func forgetHandler(args []string, author string, db *sql.DB) string {
 	res := db.QueryRow("SELECT deletion FROM users WHERE nick = ?", author)
 	if err := res.Scan(&deletionTime); err != nil {
 		if err == sql.ErrNoRows {
-			return author + ": Your nick was not found in the database."
+			return author + ": Your nick was not found in the database"
 		}
 		log.Printf("Failed to query deletion time: %s\n", err.Error())
-		return author + ": The requested action was met with an error."
+		return author + ": The requested action was met with an error"
 	}
 
 	if deletionTime.Valid {
-		return author + ": Your data is already scheduled for deletion."
+		return author + ": Your data is already scheduled for deletion"
 	}
 
 	deletionDate := time.Now()
@@ -32,7 +32,7 @@ func forgetHandler(args []string, author string, db *sql.DB) string {
 	_, err := db.Exec("UPDATE users SET deletion = ? WHERE nick = ?", deletionDate, author)
 	if err != nil {
 		log.Printf("Failed to schedule deletion: %s\n", err.Error())
-		return author + ": The requested action was met with an error."
+		return author + ": The requested action was met with an error"
 	}
 
 	return author + ": Your data is scheduled for deletion and will complete in " + strconv.Itoa(config.DeletionDays) + " days. To cancel this request, type +unforget"
@@ -83,7 +83,7 @@ func DeletionWrapper(db *sql.DB, c *irc.Conn, ctx context.Context) {
 			deletedNicks := deletionExecuter(db)
 			for _, nick := range deletedNicks {
 				// TODO: If the user isn't online, postpone the reminder until they are.
-				c.Privmsg(nick, "Your data has been successfully purged.")
+				c.Privmsg(nick, "Your data has been successfully purged")
 			}
 		}
 	}
