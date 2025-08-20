@@ -21,13 +21,13 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int =
     cleaned = defaultdict(list)
 
     url_pattern = re.compile(r"https?://\S+|www\.\S+")
-    quote_pattern = re.compile(r'^[><."“!:*\[]')
+    quote_pattern = re.compile(r'^[><."“!:+*\[]')
     for author, messages in author_message.items():
         for message in messages:
             if (
                 url_pattern.search(message) or
                 quote_pattern.match(message)
-            ): continue
+            ) or len(message) < 10: continue
             cleaned[author].append(message)
 
     cleaned_final = defaultdict(list)
@@ -35,7 +35,6 @@ def preprocess_remove_garbage(author_message: dict[str, list[str]], quota: int =
         if len(messages) < quota:
             continue
         cleaned_final[author] = messages
-
 
     return cleaned_final
 
@@ -178,17 +177,18 @@ def punctuation_tokenizer(text: str) -> list[str]:
 
 def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
     if group_k > 1:
-        reduced_tfidf = Pipeline([
+        tfidf = Pipeline([
             ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
             ("select_k_best", SelectKBest(score_func=f_classif, k=3000))
         ])
     else:
-        reduced_tfidf = Pipeline([
+        tfidf = FeatureUnion([
             ("char_ngrams", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
+            ("word_ngrams", TfidfVectorizer(analyzer="word", ngram_range=(2,3)))
         ])
 
     features = [
-        ("reduced_tfidf", reduced_tfidf),
+        ("tfidf", tfidf),
         ("punct_freq_dist", CountVectorizer(
             tokenizer=punctuation_tokenizer,
             vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
@@ -218,7 +218,7 @@ def get_X_y(min_messages: int, cf: int = 0) -> tuple[list[str], list[str]]:
 
     X, y = [], []
 
-    cap = int(min(len(v) for v in author_messages.values()) + min_messages*2)
+    cap = int(min(len(v) for v in author_messages.values()) + min_messages*1.5)
     for nick, msgs in author_messages.items():
         shuffle(msgs)
         for msg in msgs[:cap]:
@@ -234,7 +234,7 @@ def get_X_y_block(min_messages: int, cf: int = 0, group_k: int = 10, expire: int
     , min_messages)
 
     X, y = [], []
-    cap = min_messages
+    cap = int(1.5*min_messages)
 
     for nick, msgs in author_messages.items():
         shuffle(msgs)
@@ -276,10 +276,12 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
     plt.tight_layout()
     plt.savefig(filename, dpi=300)
 
+
 if __name__ == "__main__":
-    pipeline = create_pipeline()
-    X, y = get_X_y(400, 14)
+    pipeline = create_pipeline(1, False)
+    X, y = get_X_y(1000)
     pipeline.fit(X, y)
+
     print(pipeline.named_steps["clf"].classes_)
 
     c = cross_validate(pipeline, X, y, cv=5, scoring=["accuracy", "f1_macro"])
