@@ -82,8 +82,8 @@ To get help on a command, use the `help` command. Available commands are attribu
 ## Examples
 ### Retrain
 ```
-<katt> +retrain --cm --past 7
-<hearsay> katt: The SVM model has been retrained. It took 22.31 seconds to fit. Confusion matrix: http://tmpfiles.org/10579119/cm.png | 5-fold CV: Accuracy 0.5923, F1 score 0.580
+katt> +retrain --cm --past 20 --bert
+<hearsay> katt: The SVM model has been retrained. It took 40.17 seconds to fit. Confusion matrix: http://tmpfiles.org/11225615/cm.png | 5-fold CV: Accuracy 0.6321, F1 score 0.6304
 ```
 ![Confusion matrix](/misc/cm.png)
 

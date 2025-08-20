@@ -175,6 +175,7 @@ class FunctionWordVectorizer(BaseEstimator, TransformerMixin):
 def punctuation_tokenizer(text: str) -> list[str]:
     return re.findall(r'\.\.\.|[\?\!]{2,}|[.,;:!?\'"-]', text)
 
+
 def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
     if group_k > 1:
         tfidf = Pipeline([
@@ -187,16 +188,41 @@ def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
             ("word_ngrams", TfidfVectorizer(analyzer="word", ngram_range=(2,3)))
         ])
 
-    features = [
-        ("tfidf", tfidf),
-        ("punct_freq_dist", CountVectorizer(
-            tokenizer=punctuation_tokenizer,
-            vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
-            token_pattern=None
-        )),
-        ("caps", Capitalization()),
-        #("pos", POSTagging())
-    ]
+    punct_vec = CountVectorizer(
+        tokenizer=punctuation_tokenizer,
+        vocabulary=['.', '...', '?', '???', '!', ';', ':', '\''],
+        token_pattern=None
+    )
+
+    features = []
+
+    if group_k >= 15:
+        # Only when group_k >= 15 will the standard vectorizers be scaled.
+        # If this is not done, accuracy will REDUCE with group_k size increase.
+        features.extend([
+            ("char_ngrams_scaled", Pipeline([
+                ("vect", TfidfVectorizer(analyzer="char", ngram_range=(2,4))),
+                ("scl", StandardScaler(with_mean=False))
+            ])),
+            ("word_ngrams_scaled", Pipeline([
+                ("vect", TfidfVectorizer(analyzer="word", ngram_range=(2,3))),
+                ("scl", StandardScaler(with_mean=False))
+            ])),
+            ("punct_scaled", Pipeline([
+                ("vect", punct_vec),
+                ("scl", StandardScaler(with_mean=False))
+            ]))
+        ])
+    else:
+        # If group_k doesn't meet the threshold, the vectorizers' raw count will correlate better to single-instance messages.
+        features.extend([
+            ("tfidf", tfidf),
+            ("punct_freq_dist", punct_vec)
+        ])
+
+    # And lastly features that implement their own scales or are custom estimators.
+    features.append(("caps", Capitalization()))
+    #features.append(("pos", POSTagging()))
 
     if group_k > 1:
         features.append(("func_words", FunctionWordVectorizer()))
@@ -278,8 +304,8 @@ def plot_and_save_confusion_matrix(cm: np.ndarray, labels: list[str], filename: 
 
 
 if __name__ == "__main__":
-    pipeline = create_pipeline(1, False)
-    X, y = get_X_y(1000)
+    pipeline = create_pipeline(15, False)
+    X, y = get_X_y_block(1000, 0, 15)
     pipeline.fit(X, y)
 
     print(pipeline.named_steps["clf"].classes_)
