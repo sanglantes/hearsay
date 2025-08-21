@@ -1,5 +1,5 @@
 # hearsay
-An authorship attribution and NLP bot for IRC. Built in Go and Python 3. For hearsay with GPU support, see [https://github.com/sanglantes/hearsay-cuda](hearsay-cuda)
+An authorship attribution and NLP bot for IRC. Built in Go and Python 3. For hearsay with GPU support, see [hearsay-cuda](https://github.com/sanglantes/hearsay-cuda)
 
 ## Table of Contents
 - [Features](#features)
