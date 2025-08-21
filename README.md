@@ -1,5 +1,5 @@
 # hearsay
-An authorship attribution and NLP bot for IRC. Built in Go (1.24.4) and Python 3.
+An authorship attribution and NLP bot for IRC. Built in Go and Python 3. For hearsay with GPU support, see [https://github.com/sanglantes/hearsay-cuda](hearsay-cuda)
 
 ## Table of Contents
 - [Features](#features)
@@ -41,7 +41,7 @@ bot:
 
 storage:
   message_pool_size: 20
-  message_quota: 400
+  message_quota: 1000
   people_quota: 5
 
 scheduler:
@@ -56,7 +56,7 @@ model:
 - `server`: Server and port to connect to on start-up.
 - `channel`: Channel to connect to on start-up.
 - `message_pool_size`: By default, hearsay does not submit an incoming message to the database when received. Instead, it waits for a message pool to fill up before creating a transaction where all (in this case 20) messages are submitted. This prevents frequent I/O. Depending on server size, you might want to adjust this value, but 20 is a good middle ground.
-- `message_quota`: This is an important setting. Before users can access NLP commands, they must fulfil a message quota. If the message quota is too low, the bot will make inaccurate assessments. Four-hundred is on the lower side.
+- `message_quota`: This is an important setting. Before users can access NLP commands, they must fulfil a message quota. If the message quota is too low, the bot will make inaccurate assessments. One thousand is high, but yields accurate results. It is not unreasonable to lower this limit.
 - `people_quota`: Before authorship attribution commands can be used, five people must fulfil the `message_quota`. With a lower `people_quota`, the author population becomes less diverse. Five is a good start for small to medium big servers.
 - `deletion_days`: When a user issues the `forget` command, all their data will be purged. To prevent accidental deletions, their request is put on a schedule. After the set amount of days, their data will be purged. Note that `deletion_days` cannot be lower than one.
 - `bert`: Enables text embeddings with Google's BERT language model.

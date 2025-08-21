@@ -13,8 +13,6 @@ RUN set -eux \
         wget \
     && pip install --upgrade pip setuptools wheel \
     && pip install -r requirements.txt \
-    && pip install -U spacy \
-    && python -m spacy download en_core_web_sm \
     && apt-get remove -y build-essential python3-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /root/.cache/pip
