@@ -1,5 +1,5 @@
 from collections import defaultdict
-from sklearn.discriminant_analysis import StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.linear_model import SGDClassifier
 from sklearn.svm import LinearSVC
@@ -222,9 +222,8 @@ def create_pipeline(group_k: int = 1, use_bert: bool = False) -> Pipeline:
 
     # And lastly features that implement their own scales or are custom estimators.
     features.append(("caps", Capitalization()))
-    #features.append(("pos", POSTagging()))
 
-    if group_k > 1:
+    if group_k > 2:
         features.append(("func_words", FunctionWordVectorizer()))
 
     if use_bert:

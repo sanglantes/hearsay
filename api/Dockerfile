@@ -11,8 +11,11 @@ RUN set -eux \
         libffi-dev \
         python3-dev \
         wget \
+        libopenblas-dev \
+        liblapack-dev \
     && pip install --upgrade pip setuptools wheel \
-    && pip install -r requirements.txt \
+    && pip install --no-cache-dir --force-reinstall numpy scipy \
+    && pip install --no-cache-dir -r requirements.txt \
     && apt-get remove -y build-essential python3-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /root/.cache/pip
