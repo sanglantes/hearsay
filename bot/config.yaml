@@ -1,7 +1,7 @@
 bot:
   prefix: "+"
   mode: "+B"
-  server: "192.168.10.137:6697"
+  server: "irc.zoite.net:6697"
   channel: "#antisocial"
 
 storage:
