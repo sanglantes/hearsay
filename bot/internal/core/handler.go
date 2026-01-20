@@ -48,9 +48,9 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 
 	c.HandleFunc(irc.PRIVMSG,
 		func(c *irc.Conn, l *irc.Line) {
-			incomingMessageAuthor := GetNickFromRawMessage(l.Raw)
-			incomingMessageContent := GetContentFromRawMessage(l.Raw)
-			incomingMessageChannel := GetChannelFromRawMessage(l.Raw)
+			incomingMessageAuthor := l.Nick
+			incomingMessageChannel := l.Args[0]
+			incomingMessageContent := l.Args[1]
 			messageFinal := storage.Message{
 				Nick:      incomingMessageAuthor,
 				Content:   incomingMessageContent,
@@ -122,3 +122,4 @@ func HearsayConnect(Server string, Channel string, ctx context.Context, db *sql.
 		log.Println("Received server-side disconnect (such as /kill or unavailability)")
 	}
 }
+
